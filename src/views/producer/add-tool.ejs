@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32',
+                            brown: '#6D4C41',
+                            cream: '#F9F7F2',
+                            dark: '#1F2937',
+                            gray: '#6B7280',
+                            accent: '#F59E0B',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24 md:pb-10">
+
+    <!-- NAV -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+        <div class="max-w-5xl mx-auto flex items-center gap-4">
+            <a href="/producer" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-tanira-dark">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-lg leading-none">Tambahkan Alat / Produk</h1>
+                <p class="text-xs text-tanira-gray mt-0.5">Lengkapi informasi untuk petani</p>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 py-8">
+        <div class="grid lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- FORM -->
+            <div class="lg:col-span-7 space-y-8">
+                <section class="animate-enter">
+                    <form id="toolForm" class="bg-white rounded-2xl shadow-soft p-6 md:p-8 space-y-6 border-t-4 border-tanira-brown" enctype="multipart/form-data">
+                        
+                        <!-- FOTO (Sama) -->
+                        <div>
+                            <label class="block text-sm font-bold text-tanira-dark mb-2">Foto Alat</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-tanira-brown transition bg-gray-50 cursor-pointer" onclick="document.getElementById('input-image').click()">
+                                <input type="file" id="input-image" name="image" accept="image/*" class="hidden" onchange="previewImage(this)">
+                                <div id="upload-placeholder">
+                                    <i class="fa-solid fa-camera text-3xl text-gray-300 mb-2"></i>
+                                    <p class="text-sm text-gray-500">Klik untuk upload foto</p>
+                                </div>
+                                <div id="image-preview-container" class="hidden relative w-full h-48 rounded-lg overflow-hidden">
+                                    <img id="image-preview-src" src="" class="w-full h-full object-cover">
+                                    <button type="button" onclick="removeImage(event)" class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg"><i class="fa-solid fa-times"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TIPE TRANSAKSI (BARU) -->
+                        <div>
+                            <label class="block text-sm font-bold text-tanira-dark mb-3">Tipe Penawaran</label>
+                            <div class="flex gap-4">
+                                <label class="flex-1 cursor-pointer">
+                                    <input type="radio" name="transactionType" value="sewa" class="peer sr-only" checked onchange="togglePriceLabel()">
+                                    <div class="flex items-center justify-center gap-2 p-3 rounded-xl border border-gray-200 bg-white text-gray-500 peer-checked:border-tanira-brown peer-checked:bg-tanira-brown/10 peer-checked:text-tanira-brown transition font-bold">
+                                        <i class="fa-solid fa-clock"></i> Disewakan
+                                    </div>
+                                </label>
+                                <label class="flex-1 cursor-pointer">
+                                    <input type="radio" name="transactionType" value="jual" class="peer sr-only" onchange="togglePriceLabel()">
+                                    <div class="flex items-center justify-center gap-2 p-3 rounded-xl border border-gray-200 bg-white text-gray-500 peer-checked:border-green-600 peer-checked:bg-green-50 peer-checked:text-green-600 transition font-bold">
+                                        <i class="fa-solid fa-tag"></i> Dijual
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Nama -->
+                        <div>
+                            <label class="block text-sm font-bold text-tanira-dark mb-2">Nama Alat / Produk</label>
+                            <input type="text" id="input-name" name="name" placeholder="Contoh: Traktor Roda 4" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-tanira-brown transition text-lg font-bold" oninput="updatePreview()">
+                        </div>
+
+                        <!-- Kategori & Harga -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-tanira-dark mb-2">Kategori</label>
+                                <select id="input-type" name="category" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none bg-white cursor-pointer" onchange="updatePreview()">
+                                    <option value="Alat Berat">Alat Berat</option>
+                                    <option value="Alsintan Ringan">Alsintan Ringan</option>
+                                    <option value="Bibit & Pupuk">Bibit & Pupuk</option>
+                                    <option value="Jasa Tanam">Jasa Tanam</option>
+                                </select>
+                            </div>
+                            <div>
+                                <!-- Label berubah dinamis -->
+                                <label class="block text-sm font-bold text-tanira-dark mb-2" id="label-price">Harga Sewa per Hari</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-tanira-dark font-bold">Rp</div>
+                                    <input type="number" id="input-price" name="price" placeholder="0" class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-tanira-brown transition font-bold text-tanira-brown" oninput="updatePreview()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Deskripsi (Sama) -->
+                        <div>
+                            <label class="block text-sm font-bold text-tanira-dark mb-2">Deskripsi</label>
+                            <textarea id="input-desc" name="description" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none transition text-sm" placeholder="Spesifikasi, kondisi, dll..." oninput="updatePreview()"></textarea>
+                        </div>
+
+                        <!-- Status & Lokasi (Sama) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-tanira-dark mb-2">Status</label>
+                                <select id="input-status" name="status" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none bg-white" onchange="updatePreview()">
+                                    <option value="Tersedia">Tersedia</option>
+                                    <option value="Tidak Tersedia">Tidak Tersedia</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-tanira-dark mb-2">Lokasi</label>
+                                <input type="text" id="input-loc" name="location" value="Gudang Utama" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none" oninput="updatePreview()">
+                            </div>
+                        </div>
+
+                    </form>
+                </section>
+            </div>
+
+            <!-- RIGHT COLUMN: PREVIEW (UPDATED) -->
+            <div class="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-tanira-green animate-pulse"></span>
+                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Preview</h3>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-soft overflow-hidden border border-gray-100">
+                    <div class="h-48 bg-gray-100 relative flex items-center justify-center text-gray-300">
+                        <img id="card-preview-img" src="" class="hidden w-full h-full object-cover">
+                        <i id="card-placeholder-icon" class="fa-solid fa-image text-4xl"></i>
+                        
+                        <div class="absolute top-3 left-3 flex gap-2">
+                            <!-- Badge Tipe Transaksi -->
+                            <span id="preview-trans-type" class="bg-amber-100 text-amber-800 text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">SEWA</span>
+                            <span id="preview-type" class="bg-white/90 backdrop-blur text-tanira-brown text-xs font-bold px-3 py-1 rounded-full shadow-sm">Alat Berat</span>
+                        </div>
+                    </div>
+
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 id="preview-name" class="text-lg font-bold text-tanira-dark leading-tight line-clamp-2">Nama Alat Anda</h3>
+                            <span id="preview-status" class="bg-green-100 text-tanira-green text-[10px] px-2 py-0.5 rounded-full font-bold">Tersedia</span>
+                        </div>
+                        <p id="preview-desc" class="text-xs text-tanira-gray line-clamp-2 mb-4">Deskripsi alat...</p>
+                        <div class="flex items-end justify-between border-t border-gray-100 pt-4">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-0.5">Harga</p>
+                                <!-- Suffix Harga Dinamis -->
+                                <p class="text-xl font-bold text-tanira-brown"><span id="preview-price">Rp 0</span> <span id="preview-unit" class="text-xs text-gray-400 font-normal">/hari</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-tanira-brown/5 p-4 rounded-xl border border-tanira-brown/10">
+                    <button onclick="publishTool()" id="btn-publish" class="w-full bg-tanira-brown hover:bg-[#5D4037] text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                        Publikasikan Alat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 flex items-center w-full max-w-xs p-4 space-x-4 bg-white rounded-xl shadow-2xl border hidden z-50 transition-all duration-300 translate-y-[-20px] opacity-0" role="alert">
+        <div id="toast-icon" class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg"></div>
+        <div class="ml-3 text-sm font-normal text-tanira-dark" id="toast-message"></div>
+    </div>
+
+    <script>
+        const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
+
+        // --- TOAST FUNCTION ---
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const msg = document.getElementById('toast-message');
+
+            // Set Content
+            msg.innerText = message;
+            
+            if (type === 'success') {
+                toast.classList.add('border-green-100');
+                icon.className = "inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg";
+                icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else {
+                toast.classList.add('border-red-100');
+                icon.className = "inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg";
+                icon.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+            }
+
+            // Show Animation
+            toast.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-[-20px]', 'opacity-0');
+            });
+            
+            // Hide after 3s
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-20px]', 'opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        function togglePriceLabel() {
+            const isSewa = document.querySelector('input[name="transactionType"]:checked').value === 'sewa';
+            const label = document.getElementById('label-price');
+            const unit = document.getElementById('preview-unit');
+            const badge = document.getElementById('preview-trans-type');
+
+            if (isSewa) {
+                label.innerText = "Harga Sewa per Hari";
+                unit.innerText = "/hari";
+                badge.innerText = "SEWA";
+                badge.className = "bg-amber-100 text-amber-800 text-[10px] font-bold px-3 py-1 rounded-full shadow-sm";
+            } else {
+                label.innerText = "Harga Jual Satuan";
+                unit.innerText = "";
+                badge.innerText = "JUAL";
+                badge.className = "bg-blue-100 text-blue-800 text-[10px] font-bold px-3 py-1 rounded-full shadow-sm";
+            }
+        }
+
+        function updatePreview() {
+            document.getElementById('preview-name').innerText = document.getElementById('input-name').value || "Nama Alat";
+            document.getElementById('preview-type').innerText = document.getElementById('input-type').value;
+            document.getElementById('preview-desc').innerText = document.getElementById('input-desc').value || "Deskripsi...";
+            document.getElementById('preview-price').innerText = formatIDR(document.getElementById('input-price').value || 0);
+            
+            const status = document.getElementById('input-status').value;
+            const badge = document.getElementById('preview-status');
+            badge.innerText = status;
+            if(status === 'Tersedia') badge.className = "bg-green-100 text-tanira-green text-[10px] px-2 py-0.5 rounded-full font-bold";
+            else badge.className = "bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold";
+            
+            togglePriceLabel(); // Ensure correct label on update
+        }
+
+        function previewImage(input) {
+            const file = input.files[0];
+            
+            if (file) {
+                // Validate Size (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('Ukuran gambar terlalu besar! Maksimal 5MB.', 'error');
+                    input.value = ""; 
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('upload-placeholder').classList.add('hidden');
+                    document.getElementById('image-preview-container').classList.remove('hidden');
+                    document.getElementById('image-preview-src').src = e.target.result;
+                    
+                    document.getElementById('card-placeholder-icon').classList.add('hidden');
+                    document.getElementById('card-preview-img').src = e.target.result;
+                    document.getElementById('card-preview-img').classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeImage(e) {
+            e.stopPropagation();
+            document.getElementById('input-image').value = "";
+            document.getElementById('upload-placeholder').classList.remove('hidden');
+            document.getElementById('image-preview-container').classList.add('hidden');
+            document.getElementById('card-preview-img').classList.add('hidden');
+            document.getElementById('card-placeholder-icon').classList.remove('hidden');
+        }
+
+        async function publishTool() {
+            const btn = document.getElementById('btn-publish');
+            const originalText = btn.innerText;
+            btn.innerText = "Memproses...";
+            btn.disabled = true;
+
+            const formData = new FormData(document.getElementById('toolForm'));
+
+            try {
+                const response = await fetch('/producer/add-tool', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if(result.success) {
+                    showToast("Alat berhasil ditambahkan!", "success");
+                    setTimeout(() => {
+                        window.location.href = result.redirectUrl;
+                    }, 1500);
+                } else {
+                    showToast('Gagal: ' + result.message, "error");
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Terjadi kesalahan koneksi', "error");
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

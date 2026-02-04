@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cek Email Anda - TANIRA</title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    <!-- Fonts & CSS tetap sama -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/css/output.css">
+    <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+
+    <!-- MAIN CARD -->
+    <main class="w-full max-w-md bg-white rounded-3xl shadow-lg p-8 md:p-10 text-center relative z-10">
+        
+        <div class="flex justify-center mb-8">
+            <div class="relative w-24 h-24 bg-green-50 rounded-full flex items-center justify-center animate-float">
+                <i class="fa-solid fa-envelope-open-text text-4xl text-tanira-green"></i>
+            </div>
+        </div>
+
+        <h1 class="text-2xl font-bold text-tanira-dark mb-3">Cek Email Anda</h1>
+        <p class="text-tanira-gray text-sm leading-relaxed mb-6">
+            Kami telah mengirimkan tautan verifikasi ke:<br>
+            <!-- EJS Variable Email -->
+            <span class="font-bold text-tanira-dark bg-gray-50 px-2 py-1 rounded mt-1 inline-block" id="userEmail"><%= email %></span>
+        </p>
+
+        <a href="https://mail.google.com" target="_blank" class="block w-full bg-tanira-green hover:bg-[#1B5E20] text-white font-bold py-3.5 rounded-xl shadow-lg transition mb-4">
+            Buka Aplikasi Email
+        </a>
+
+        <!-- Resend Section -->
+        <div class="border-t border-gray-100 pt-6">
+            <p class="text-sm text-gray-500 mb-3">
+                Tidak menerima email? <br>
+                <span class="text-xs text-gray-400">(Cek folder Spam atau Promosi)</span>
+            </p>
+            
+            <button id="resendBtn" onclick="handleResend()" class="text-tanira-green font-bold text-sm hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline transition">
+                Kirim Ulang Tautan
+            </button>
+            <p id="timerText" class="text-xs text-gray-400 mt-2 hidden">
+                Tunggu <span id="countdown" class="font-bold text-tanira-dark">60</span> detik untuk kirim ulang
+            </p>
+        </div>
+    </main>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-white px-4 py-3 rounded-xl shadow-2xl border border-green-100 flex items-center gap-3 transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none z-50">
+        <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-tanira-green text-xs">
+            <i class="fa-solid fa-paper-plane"></i>
+        </div>
+        <p id="toastMessage" class="text-sm font-bold text-tanira-dark">Email berhasil dikirim!</p>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const resendBtn = document.getElementById('resendBtn');
+        const timerText = document.getElementById('timerText');
+        const countdownEl = document.getElementById('countdown');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMessage');
+        const userEmail = document.getElementById('userEmail').innerText;
+        
+        let timeLeft = 60;
+        let timerId = null;
+
+        // Auto start timer on page load (Optional, user might expect this)
+        startTimer();
+
+        async function handleResend() {
+            resendBtn.disabled = true;
+            resendBtn.innerText = "Mengirim...";
+            
+            try {
+                // REAL API CALL
+                const response = await fetch('/auth/resend-verification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showToast(data.message);
+                    startTimer();
+                } else {
+                    showToast(data.message || "Gagal mengirim ulang", true);
+                    resetResendState();
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Terjadi kesalahan koneksi", true);
+                resetResendState();
+            }
+        }
+
+        function startTimer() {
+            timeLeft = 60;
+            resendBtn.classList.add('hidden');
+            timerText.classList.remove('hidden');
+            countdownEl.innerText = timeLeft;
+
+            if(timerId) clearInterval(timerId);
+
+            timerId = setInterval(() => {
+                timeLeft--;
+                countdownEl.innerText = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    resetResendState();
+                }
+            }, 1000);
+        }
+
+        function resetResendState() {
+            resendBtn.disabled = false;
+            resendBtn.classList.remove('hidden');
+            resendBtn.innerText = "Kirim Ulang Tautan";
+            timerText.classList.add('hidden');
+        }
+
+        function showToast(message, isError = false) {
+            toastMsg.innerText = message;
+            if(isError) toastMsg.classList.add('text-red-600');
+            else toastMsg.classList.remove('text-red-600');
+
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

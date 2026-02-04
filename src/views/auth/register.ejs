@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - TANIRA</title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/css/output.css">
+    <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="font-sans text-tanira-dark bg-tanira-cream antialiased">
+
+    <div class="min-h-screen flex">
+        <!-- Left Side: Image (Tetap sama) -->
+        <div class="hidden lg:flex w-1/2 bg-tanira-brown relative items-center justify-center overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae?q=80&w=1920&auto=format&fit=crop" alt="Modern Farmer" class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-multiply">
+            <div class="relative z-10 p-12 text-white max-w-lg">
+                <h2 class="text-4xl font-bold leading-tight mb-6">"Bergabung dengan ekosistem pertanian digital #1 di Indonesia."</h2>
+            </div>
+        </div>
+
+        <!-- Right Side: Register Form -->
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-tanira-cream relative min-h-screen">
+            <div class="w-full max-w-md pt-16 lg:pt-0">
+                
+                <div class="text-center lg:text-left mb-8">
+                    <h2 class="text-3xl font-bold text-tanira-dark mb-2">Buat Akun Baru 🚀</h2>
+                    <p class="text-tanira-gray">Lengkapi data diri untuk memulai agribisnis digital Anda.</p>
+                </div>
+
+                <!-- ALERT ERROR -->
+                <% if (error) { %>
+                <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-r" role="alert">
+                    <p class="font-bold">Gagal Mendaftar</p>
+                    <p><%= error %></p>
+                </div>
+                <% } %>
+
+                <!-- FORM -->
+                <form action="/auth/register" method="POST" class="space-y-4">
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-tanira-dark mb-2">Nama Lengkap</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-tanira-gray/50">
+                                <i class="fa-regular fa-user"></i>
+                            </div>
+                            <!-- Added name="name" -->
+                            <input type="text" name="name" required placeholder="Contoh: Budi Santoso" class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-tanira-green focus:ring-2 focus:ring-tanira-green/20 transition-all text-sm text-tanira-dark font-medium shadow-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-tanira-dark mb-2">Email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-tanira-gray/50">
+                                <i class="fa-regular fa-envelope"></i>
+                            </div>
+                            <!-- Added name="email" -->
+                            <input type="email" name="email" required placeholder="nama@email.com" class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-tanira-green focus:ring-2 focus:ring-tanira-green/20 transition-all text-sm text-tanira-dark font-medium shadow-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-tanira-dark">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-tanira-gray/50">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
+                            <!-- Added name="password" -->
+                            <input type="password" name="password" required id="regPassword" placeholder="Minimal 8 karakter" class="w-full pl-11 pr-12 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-tanira-green focus:ring-2 focus:ring-tanira-green/20 transition-all text-sm text-tanira-dark font-medium shadow-sm">
+                            <button type="button" onclick="toggleRegPassword()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-tanira-gray/50 hover:text-tanira-gray">
+                                <i class="fa-regular fa-eye" id="regEyeIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-tanira-dark mb-2">Konfirmasi Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-tanira-gray/50">
+                                <i class="fa-solid fa-check-double"></i>
+                            </div>
+                            <!-- Added name="confirmPassword" -->
+                            <input type="password" name="confirmPassword" required placeholder="Ulangi password" class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-tanira-green focus:ring-2 focus:ring-tanira-green/20 transition-all text-sm text-tanira-dark font-medium shadow-sm">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-tanira-green hover:bg-tanira-greenDark text-white font-bold py-3.5 rounded-xl shadow-lg shadow-tanira-green/30 transition-all mt-2">
+                        Daftar Sekarang
+                    </button>
+
+                </form>
+
+                <p class="text-center text-sm text-tanira-gray mt-8">
+                    Sudah punya akun? 
+                    <a href="/auth/login" class="font-bold text-tanira-green hover:underline">Masuk di sini</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleRegPassword() {
+            const passwordInput = document.getElementById('regPassword');
+            const eyeIcon = document.getElementById('regEyeIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32',
+                            greenLight: '#E8F5E9',
+                            greenDark: '#1B5E20',
+                            brown: '#6D4C41',
+                            cream: '#F9F7F2',
+                            dark: '#1F2937',
+                            gray: '#6B7280',
+                            accent: '#F59E0B',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24">
+
+    <!-- NAV -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+        <div class="max-w-4xl mx-auto flex items-center gap-4">
+            <a href="/smart-planting" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-tanira-dark">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-lg leading-none">Simulasi Tanam</h1>
+                <p class="text-xs text-tanira-gray mt-0.5"><%= crop.name %></p>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 py-8 space-y-6">
+
+        <!-- PARAMETER INPUT -->
+        <section class="bg-white rounded-2xl shadow-soft p-6 border border-gray-100">
+            <h2 class="font-bold text-lg text-tanira-dark mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-tanira-green"></i> Parameter Lahan
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Luas Lahan -->
+                <div>
+                    <label class="block text-sm font-medium text-tanira-gray mb-2">Luas Lahan (Hektar)</label>
+                    <div class="relative">
+                        <input type="number" id="inputArea" value="<%= landArea %>" step="0.1" min="0.1" class="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-tanira-green focus:ring-2 focus:ring-tanira-green/20 font-bold text-tanira-dark transition">
+                        <span class="absolute right-4 top-3 text-gray-400 font-medium">Ha</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">Berdasarkan data profil Anda.</p>
+                </div>
+
+                <!-- Estimasi Harga Jual -->
+                <div>
+                    <label class="block text-sm font-medium text-tanira-gray mb-2">Estimasi Harga Jual /kg</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-3 text-gray-400 font-medium">Rp</span>
+                        <input type="number" id="inputPrice" value="<%= crop.marketPrice %>" step="500" class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-tanira-green focus:ring-2 focus:ring-tanira-green/20 font-bold text-tanira-dark transition">
+                    </div>
+                    <p class="text-xs text-green-600 mt-2"><i class="fa-solid fa-check-circle"></i> Sesuai harga pasar saat ini.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- HASIL SIMULASI -->
+        <section class="grid md:grid-cols-2 gap-6">
+            
+            <!-- COST BREAKDOWN -->
+            <div class="bg-white rounded-2xl shadow-soft p-6 border border-gray-100">
+                <h3 class="font-bold text-tanira-dark mb-4 text-center">Estimasi Biaya Operasional</h3>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center pb-3 border-b border-gray-50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center text-tanira-green"><i class="fa-solid fa-seedling"></i></div>
+                            <span class="text-sm text-gray-600">Bibit & Semai</span>
+                        </div>
+                        <span class="font-bold text-tanira-dark" id="valSeeds">-</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-3 border-b border-gray-50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500"><i class="fa-solid fa-flask"></i></div>
+                            <span class="text-sm text-gray-600">Pupuk & Obat</span>
+                        </div>
+                        <span class="font-bold text-tanira-dark" id="valFertilizer">-</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-3 border-b border-gray-50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-orange-500"><i class="fa-solid fa-users-gear"></i></div>
+                            <span class="text-sm text-gray-600">Tenaga Kerja</span>
+                        </div>
+                        <span class="font-bold text-tanira-dark" id="valLabor">-</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><i class="fa-solid fa-ellipsis"></i></div>
+                            <span class="text-sm text-gray-600">Lain-lain</span>
+                        </div>
+                        <span class="font-bold text-tanira-dark" id="valOthers">-</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-gray-100 flex justify-between items-center bg-red-50 p-4 rounded-xl">
+                    <span class="text-sm font-bold text-red-500">Total Modal</span>
+                    <span class="text-lg font-bold text-red-600" id="totalCost">-</span>
+                </div>
+            </div>
+
+            <!-- PROFIT PROJECTION -->
+            <div class="bg-tanira-greenDark text-white rounded-2xl shadow-soft p-6 relative overflow-hidden flex flex-col justify-between">
+                <!-- Background Decoration -->
+                <div class="absolute top-0 right-0 w-40 h-40 bg-white opacity-5 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3"></div>
+                
+                <div>
+                    <h3 class="font-bold text-white/90 mb-6 text-center">Proyeksi Hasil Panen</h3>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6 text-center">
+                        <div class="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
+                            <p class="text-xs text-green-200 mb-1">Total Produksi</p>
+                            <p class="text-xl font-bold text-white" id="totalYield">-</p>
+                            <p class="text-[10px] text-green-200">Ton</p>
+                        </div>
+                        <div class="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
+                            <p class="text-xs text-green-200 mb-1">Durasi</p>
+                            <p class="text-xl font-bold text-white"><%= crop.duration %></p>
+                            <p class="text-[10px] text-green-200">Bulan</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <p class="text-sm text-green-200 text-center mb-1">Estimasi Pendapatan Kotor</p>
+                        <p class="text-2xl font-bold text-center text-white" id="grossRevenue">-</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-white text-tanira-greenDark p-4 rounded-xl text-center shadow-lg">
+                    <p class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Potensi Keuntungan Bersih</p>
+                    <p class="text-3xl font-extrabold" id="netProfit">-</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA SAVE PLAN -->
+        <div class="flex justify-center pt-4">
+            <button onclick="savePlan()" id="btnSave" class="bg-tanira-green hover:bg-tanira-greenDark text-white font-bold py-4 px-12 rounded-xl shadow-lg transition-all transform hover:-translate-y-1 flex items-center gap-3">
+                <i class="fa-regular fa-floppy-disk"></i> Simpan Rencana Tanam Ini
+            </button>
+        </div>
+
+    </main>
+
+    <!-- LOGIC KALKULASI & API -->
+    <script>
+        // Data dari Server (Disisipkan oleh EJS)
+        const baseCosts = {
+            seeds: <%= crop.costs.seeds %>,
+            fertilizer: <%= crop.costs.fertilizer %>,
+            labor: <%= crop.costs.labor %>,
+            others: <%= crop.costs.others %>
+        };
+        const yieldPerHa = <%= crop.yieldPerHa %>; // kg
+        const cropName = "<%= crop.name %>";
+        const cropDuration = <%= crop.duration %>;
+
+        // DOM Elements
+        const elArea = document.getElementById('inputArea');
+        const elPrice = document.getElementById('inputPrice');
+        
+        const elValSeeds = document.getElementById('valSeeds');
+        const elValFertilizer = document.getElementById('valFertilizer');
+        const elValLabor = document.getElementById('valLabor');
+        const elValOthers = document.getElementById('valOthers');
+        const elTotalCost = document.getElementById('totalCost');
+        
+        const elTotalYield = document.getElementById('totalYield');
+        const elGrossRevenue = document.getElementById('grossRevenue');
+        const elNetProfit = document.getElementById('netProfit');
+
+        const btnSave = document.getElementById('btnSave');
+
+        // Formatter Rupiah Client-Side
+        const formatIDR = (num) => {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
+        };
+
+        // Fungsi Kalkulasi Realtime
+        function calculate() {
+            const area = parseFloat(elArea.value) || 0;
+            const price = parseFloat(elPrice.value) || 0;
+
+            // 1. Costs
+            const costSeeds = baseCosts.seeds * area;
+            const costFertilizer = baseCosts.fertilizer * area;
+            const costLabor = baseCosts.labor * area;
+            const costOthers = baseCosts.others * area;
+            const totalCost = costSeeds + costFertilizer + costLabor + costOthers;
+
+            // 2. Revenue
+            const totalYieldKg = yieldPerHa * area;
+            const totalYieldTon = totalYieldKg / 1000;
+            const revenue = totalYieldKg * price;
+
+            // 3. Profit
+            const profit = revenue - totalCost;
+
+            // Update UI
+            elValSeeds.innerText = formatIDR(costSeeds);
+            elValFertilizer.innerText = formatIDR(costFertilizer);
+            elValLabor.innerText = formatIDR(costLabor);
+            elValOthers.innerText = formatIDR(costOthers);
+            elTotalCost.innerText = formatIDR(totalCost);
+
+            elTotalYield.innerText = totalYieldTon.toFixed(1);
+            elGrossRevenue.innerText = formatIDR(revenue);
+            elNetProfit.innerText = formatIDR(profit);
+        }
+
+        // Fungsi Simpan Rencana ke Database
+        async function savePlan() {
+            const originalText = btnSave.innerHTML;
+            
+            // 1. UI Loading
+            btnSave.disabled = true;
+            btnSave.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...';
+
+            // 2. Ambil Data Kalkulasi Terakhir
+            const area = parseFloat(elArea.value) || 0;
+            const price = parseFloat(elPrice.value) || 0;
+            const totalYieldKg = yieldPerHa * area;
+            const totalYieldTon = totalYieldKg / 1000;
+            
+            const totalCost = (baseCosts.seeds + baseCosts.fertilizer + baseCosts.labor + baseCosts.others) * area;
+            const revenue = totalYieldKg * price;
+            const profit = revenue - totalCost;
+
+            // 3. Kirim ke Backend
+            try {
+                const response = await fetch('/smart-planting/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        cropName: cropName,
+                        landArea: area,
+                        totalYield: totalYieldTon, // Disimpan dalam Ton
+                        expectedProfit: profit,
+                        duration: cropDuration
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Redirect ke halaman sukses
+                    window.location.href = result.redirectUrl;
+                } else {
+                    alert('Gagal menyimpan: ' + result.message);
+                    btnSave.disabled = false;
+                    btnSave.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Terjadi kesalahan koneksi.');
+                btnSave.disabled = false;
+                btnSave.innerHTML = originalText;
+            }
+        }
+
+        // Event Listeners
+        elArea.addEventListener('input', calculate);
+        elPrice.addEventListener('input', calculate);
+
+        // Jalankan kalkulasi awal saat halaman dimuat
+        calculate();
+    </script>
+
+</body>
+</html>

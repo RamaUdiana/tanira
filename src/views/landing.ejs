@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TANIRA - Ekosistem Pertanian Digital Terpadu</title>
+    <meta name="description" content="Platform digital untuk pre-order panen dan marketplace alat pertanian, menghubungkan petani kecil dengan pasar yang adil.">
+
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <!-- Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons: FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/css/output.css">
+    <link rel="stylesheet" href="/css/custom.css">
+
+    <!-- Custom Styles for Scroll Animation -->
+    <style>
+        /* Base state: invisible and slightly pushed down */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+
+        /* Active state: visible and in original position */
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Staggered delays for children elements if needed */
+        .reveal-delay-100 { transition-delay: 0.1s; }
+        .reveal-delay-200 { transition-delay: 0.2s; }
+        .reveal-delay-300 { transition-delay: 0.3s; }
+    </style>
+
+</head>
+<body class="font-sans text-tanira-dark bg-tanira-cream antialiased selection:bg-tanira-green selection:text-white">
+
+    <!-- Navbar -->
+    <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-tanira-cream/90 backdrop-blur-md border-b border-gray-100 py-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-10">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <img src="/logo/logo.png" 
+                         onerror="this.src='https://placehold.co/40x40/2f7d32/ffffff?text=T'"
+                         alt="Logo TANIRA" 
+                         class="w-10 h-10 rounded-lg object-contain p-1">
+                    
+                    <span class="font-bold text-2xl tracking-tight text-tanira-green">TANIRA</span>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#about" class="text-tanira-gray hover:text-tanira-green font-medium transition">Tentang</a>
+                    <a href="#problems" class="text-tanira-gray hover:text-tanira-green font-medium transition">Masalah</a>
+                    <a href="#solutions" class="text-tanira-gray hover:text-tanira-green font-medium transition">Fitur</a>
+                    <a href="#how-it-works" class="text-tanira-gray hover:text-tanira-green font-medium transition">Cara Kerja</a>
+                    
+                    <!-- LOGIC AUTHENTICATION EJS -->
+                    <% if (user) { %>
+                        <div class="flex items-center gap-4 border-l border-gray-200 pl-4">
+                            <span class="text-tanira-dark font-medium text-sm">Halo, <%= user.name %>!</span>
+                            <a href="/dashboard" class="bg-tanira-green hover:bg-tanira-greenDark text-white px-5 py-2.5 rounded-full font-semibold transition shadow-lg shadow-tanira-green/20">
+                                Dashboard
+                            </a>
+                        </div>
+                    <% } else { %>
+                        <div class="flex items-center gap-4 border-l border-gray-200 pl-4">
+                            <a href="/auth/login" class="text-tanira-brown font-semibold hover:text-tanira-green transition">Masuk</a>
+                            <a href="/auth/register" class="bg-tanira-green hover:bg-tanira-greenDark text-white px-5 py-2.5 rounded-full font-semibold transition shadow-lg shadow-tanira-green/20">
+                                Daftar Sekarang
+                            </a>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-tanira-dark hover:text-tanira-green focus:outline-none">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 absolute w-full shadow-lg">
+            <div class="px-4 pt-4 pb-6 space-y-2">
+                <a href="#about" class="block px-3 py-2 rounded-md text-base font-medium text-tanira-gray hover:text-tanira-green hover:bg-green-50">Tentang</a>
+                <a href="#problems" class="block px-3 py-2 rounded-md text-base font-medium text-tanira-gray hover:text-tanira-green hover:bg-green-50">Masalah</a>
+                <a href="#solutions" class="block px-3 py-2 rounded-md text-base font-medium text-tanira-gray hover:text-tanira-green hover:bg-green-50">Fitur</a>
+                <a href="#how-it-works" class="block px-3 py-2 rounded-md text-base font-medium text-tanira-gray hover:text-tanira-green hover:bg-green-50">Cara Kerja</a>
+                
+                <!-- MOBILE AUTH LOGIC -->
+                <% if (user) { %>
+                    <div class="pt-4 border-t border-gray-100 flex flex-col gap-3">
+                        <span class="block text-center px-3 py-2 font-semibold text-tanira-dark">Halo, <%= user.name %></span>
+                        <a href="/dashboard" class="block text-center w-full bg-tanira-green text-white px-5 py-3 rounded-lg font-bold">Buka Dashboard</a>
+                        <a href="/auth/logout" class="block text-center text-sm text-red-500 font-medium">Keluar</a>
+                    </div>
+                <% } else { %>
+                    <div class="pt-4 border-t border-gray-100 flex flex-col gap-3">
+                        <a href="/auth/login" class="block text-center px-3 py-2 font-semibold text-tanira-brown">Masuk</a>
+                        <a href="/auth/register" class="block text-center w-full bg-tanira-green text-white px-5 py-3 rounded-lg font-bold">Daftar Sekarang</a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden" id="about">
+        <!-- Decoration BG -->
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-tanira-green/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-tanira-accent/10 rounded-full blur-3xl"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+                <!-- Text Content -->
+                <div class="space-y-8 reveal">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-tanira-green text-sm font-semibold border border-green-200">
+                        <span class="w-2 h-2 rounded-full bg-tanira-accent"></span>
+                        Solusi Agribisnis Terpadu
+                    </div>
+                    <h1 class="text-4xl lg:text-6xl font-bold leading-tight text-tanira-dark">
+                        Kepastian Harga Panen untuk <span class="text-tanira-green relative inline-block">
+                            Petani Mandiri
+                            <svg class="absolute w-full h-3 -bottom-1 left-0 text-tanira-accent opacity-60" viewBox="0 0 200 9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.00025 6.99997C2.00025 6.99997 59.5002 2.49997 100.5 2.49997C141.5 2.49997 198 6.99997 198 6.99997" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+                        </span>
+                    </h1>
+                    <p class="text-lg text-tanira-gray leading-relaxed max-w-lg">
+                        Tingkatkan posisi tawar hasil tanimu dengan sistem <strong>Pre-Order</strong>. Terhubung langsung dengan pembeli dan dapatkan akses alat pertanian berkualitas dalam satu aplikasi.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="#how-it-works" class="px-8 py-4 bg-tanira-green hover:bg-tanira-greenDark text-white rounded-xl font-bold transition shadow-lg shadow-tanira-green/30 text-center flex items-center justify-center gap-2 group">
+                            Lihat Cara Kerja
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                        
+                        <!-- Dynamic Link based on Login Status -->
+                        <% if (user) { %>
+                            <a href="/dashboard" class="px-8 py-4 bg-white border-2 border-tanira-brown/20 text-tanira-brown hover:border-tanira-brown hover:bg-tanira-brown/5 rounded-xl font-bold transition text-center">
+                                Buka Dashboard
+                            </a>
+                        <% } else { %>
+                            <a href="/auth/register" class="px-8 py-4 bg-white border-2 border-tanira-brown/20 text-tanira-brown hover:border-tanira-brown hover:bg-tanira-brown/5 rounded-xl font-bold transition text-center">
+                                Mulai Rencana Tanam
+                            </a>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Trust Metrics -->
+                    <div class="pt-6 flex items-center gap-8 border-t border-gray-200 reveal reveal-delay-200">
+                        <div>
+                            <p class="text-3xl font-bold text-tanira-dark">2.5k+</p>
+                            <p class="text-sm text-tanira-gray">Petani Bergabung</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold text-tanira-dark">150+</p>
+                            <p class="text-sm text-tanira-gray">Mitra Pembeli</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold text-tanira-dark">5k+</p>
+                            <p class="text-sm text-tanira-gray">Total Penjualan</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero Image -->
+                <div class="relative lg:h-[600px] rounded-3xl overflow-hidden shadow-2xl group reveal reveal-delay-300">
+                    <!-- Image -->
+                    <img 
+                        src="https://images.unsplash.com/photo-1602867741746-6df80f40b3f6?q=80&w=735&auto=format&fit=crop" 
+                        alt="Petani Indonesia sedang memeriksa hasil panen di ladang" 
+                        class="w-full h-full object-cover transform group-hover:scale-105 transition duration-700"
+                    >
+                    <!-- Overlay Gradient -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    
+                    <!-- Floating Card -->
+                    <div class="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur-sm p-4 rounded-xl border border-white/20 shadow-lg reveal reveal-delay-300">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-tanira-green">
+                                <i class="fa-solid fa-chart-line text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Prediksi Harga Pasar</p>
+                                <p class="font-bold text-tanira-dark">Stabil & Menguntungkan</p>
+                            </div>
+                            <div class="ml-auto text-tanira-green font-bold text-sm">
+                                +12% <i class="fa-solid fa-arrow-trend-up"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section id="problems" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+                <h2 class="text-tanira-brown font-bold text-lg mb-2 tracking-wide uppercase">Realita Lapangan</h2>
+                <h3 class="text-3xl md:text-4xl font-bold text-tanira-dark">Mengapa Petani Sulit Sejahtera?</h3>
+                <p class="mt-4 text-tanira-gray">Masalah klasik yang terus berulang menghambat potensi pertanian lokal kita.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Problem 1 -->
+                <div class="group bg-tanira-cream rounded-2xl overflow-hidden hover:shadow-xl transition duration-300 border border-transparent hover:border-tanira-brown/10 reveal reveal-delay-100">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1563514227147-6d2ff665a6a0?q=80&w=1471&auto=format&fit=crop" alt="Harga anjlok" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition"></div>
+                    </div>
+                    <div class="p-8">
+                        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-600 mb-4 text-xl">
+                            <i class="fa-solid fa-arrow-trend-down"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-tanira-dark mb-3">Harga Jatuh Saat Panen</h4>
+                        <p class="text-tanira-gray text-sm leading-relaxed">
+                            Suplai berlebih dan permainan tengkulak membuat harga jual seringkali di bawah modal tanam.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Problem 2 -->
+                <div class="group bg-tanira-cream rounded-2xl overflow-hidden hover:shadow-xl transition duration-300 border border-transparent hover:border-tanira-brown/10 reveal reveal-delay-200">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1599930113854-d6d7fd521f10?q=80&w=800&auto=format&fit=crop" alt="Akses pasar terbatas" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition"></div>
+                    </div>
+                    <div class="p-8">
+                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 mb-4 text-xl">
+                            <i class="fa-solid fa-hand-holding-dollar"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-tanira-dark mb-3">Ketergantungan Tengkulak</h4>
+                        <p class="text-tanira-gray text-sm leading-relaxed">
+                            Rantai distribusi yang panjang memotong keuntungan petani hingga titik terendah.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Problem 3 -->
+                <div class="group bg-tanira-cream rounded-2xl overflow-hidden hover:shadow-xl transition duration-300 border border-transparent hover:border-tanira-brown/10 reveal reveal-delay-300">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1592419044706-39796d40f98c?q=80&w=800&auto=format&fit=crop" alt="Alat mahal" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition"></div>
+                    </div>
+                    <div class="p-8">
+                        <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 mb-4 text-xl">
+                            <i class="fa-solid fa-wrench"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-tanira-dark mb-3">Teknologi & Alat Mahal</h4>
+                        <p class="text-tanira-gray text-sm leading-relaxed">
+                            Sulit mengakses alat modern untuk efisiensi karena biaya beli yang sangat tinggi.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution / Value Proposition -->
+    <section id="solutions" class="py-20 bg-tanira-green/5 relative bg-pattern-leaf">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl md:text-4xl font-bold text-tanira-dark">Solusi Ekosistem TANIRA</h2>
+                <p class="mt-4 text-tanira-gray max-w-2xl mx-auto">Kami membangun jembatan digital agar petani bisa bertransaksi dengan adil dan efisien.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Feature 1 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all border-b-4 border-tanira-green reveal reveal-delay-100">
+                    <div class="w-14 h-14 bg-green-50 rounded-xl flex items-center justify-center text-tanira-green text-2xl mb-6">
+                        <i class="fa-solid fa-handshake-simple"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-tanira-dark mb-2">Pre-Order Panen</h3>
+                    <p class="text-sm text-tanira-gray">Dapatkan kepastian pembeli dan harga bahkan sebelum benih ditanam.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all border-b-4 border-tanira-brown reveal reveal-delay-200">
+                    <div class="w-14 h-14 bg-amber-50 rounded-xl flex items-center justify-center text-tanira-brown text-2xl mb-6">
+                        <i class="fa-solid fa-tractor"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-tanira-dark mb-2">Marketplace Alat</h3>
+                    <p class="text-sm text-tanira-gray">Beli atau sewa alat pertanian dari produsen lokal dengan harga transparan.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all border-b-4 border-tanira-accent reveal reveal-delay-300">
+                    <div class="w-14 h-14 bg-yellow-50 rounded-xl flex items-center justify-center text-tanira-accent text-2xl mb-6">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-tanira-dark mb-2">Harga Referensi</h3>
+                    <p class="text-sm text-tanira-gray">Data harga pasar real-time agar petani tidak tertipu spekulan.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all border-b-4 border-blue-500 reveal reveal-delay-300">
+                    <div class="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 text-2xl mb-6">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-tanira-dark mb-2">AI Asisten Tanam</h3>
+                    <p class="text-sm text-tanira-gray">Rekomendasi waktu tanam terbaik berdasarkan cuaca dan tren pasar.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row gap-12 items-center">
+                <div class="lg:w-1/2 reveal">
+                    <h2 class="text-tanira-green font-bold uppercase tracking-wider mb-2">Langkah Mudah</h2>
+                    <h3 class="text-3xl md:text-4xl font-bold text-tanira-dark mb-6">Mulai Transaksi dalam 4 Tahap</h3>
+                    <p class="text-tanira-gray mb-8">Tanira menyederhanakan proses rantai pasok yang rumit menjadi langkah sederhana dalam genggaman.</p>
+                    
+                    <div class="space-y-6">
+                        <!-- Step 1 -->
+                        <div class="flex gap-4 group">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-tanira-green text-white flex items-center justify-center font-bold text-lg group-hover:scale-110 transition">1</div>
+                            <div>
+                                <h4 class="font-bold text-lg text-tanira-dark">Daftarkan Lahan</h4>
+                                <p class="text-sm text-tanira-gray">Isi data luas lahan, lokasi, dan komoditas.</p>
+                            </div>
+                        </div>
+                        <!-- Step 2 -->
+                        <div class="flex gap-4 group">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-tanira-cream text-tanira-green border border-tanira-green flex items-center justify-center font-bold text-lg group-hover:bg-tanira-green group-hover:text-white transition">2</div>
+                            <div>
+                                <h4 class="font-bold text-lg text-tanira-dark">Buat Rencana Tanam</h4>
+                                <p class="text-sm text-tanira-gray">Tentukan target panen untuk ditawarkan ke pembeli.</p>
+                            </div>
+                        </div>
+                        <!-- Step 3 -->
+                        <div class="flex gap-4 group">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-tanira-cream text-tanira-green border border-tanira-green flex items-center justify-center font-bold text-lg group-hover:bg-tanira-green group-hover:text-white transition">3</div>
+                            <div>
+                                <h4 class="font-bold text-lg text-tanira-dark">Terima Pre-Order</h4>
+                                <p class="text-sm text-tanira-gray">Pembeli mengajukan penawaran, deal harga di awal.</p>
+                            </div>
+                        </div>
+                        <!-- Step 4 -->
+                        <div class="flex gap-4 group">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-tanira-cream text-tanira-green border border-tanira-green flex items-center justify-center font-bold text-lg group-hover:bg-tanira-green group-hover:text-white transition">4</div>
+                            <div>
+                                <h4 class="font-bold text-lg text-tanira-dark">Panen & Kirim</h4>
+                                <p class="text-sm text-tanira-gray">Pembayaran cair otomatis saat barang diterima.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lg:w-1/2 relative reveal reveal-delay-200">
+                    <div class="absolute inset-0 bg-tanira-green/10 rounded-3xl transform rotate-3"></div>
+                    <img src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae?q=80&w=800&auto=format&fit=crop" alt="Petani menggunakan HP" class="relative rounded-3xl shadow-xl w-full object-cover h-[400px] lg:h-[500px]">
+                    <!-- Floating Badge -->
+                    <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg flex items-center gap-3 animate-bounce" style="animation-duration: 3s;">
+                        <i class="fa-solid fa-check-circle text-green-500 text-3xl"></i>
+                        <div>
+                            <p class="text-xs text-gray-500">Status Pembayaran</p>
+                            <p class="font-bold text-tanira-dark">Dana Cair 100%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Features Highlight -->
+    <section class="py-20 bg-tanira-dark text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-gray-700">
+                <div class="p-4 reveal reveal-delay-100">
+                    <i class="fa-solid fa-users-viewfinder text-4xl text-tanira-accent mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Komunitas Terverifikasi</h3>
+                    <p class="text-gray-400 text-sm">Semua petani dan pembeli melewati proses KYC untuk keamanan transaksi.</p>
+                </div>
+                <div class="p-4 reveal reveal-delay-200">
+                    <i class="fa-solid fa-truck-fast text-4xl text-tanira-accent mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Logistik Terintegrasi</h3>
+                    <p class="text-gray-400 text-sm">Kerjasama dengan penyedia logistik lokal untuk penjemputan hasil panen.</p>
+                </div>
+                <div class="p-4 reveal reveal-delay-300">
+                    <i class="fa-solid fa-leaf text-4xl text-tanira-accent mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">Sustainable Farming</h3>
+                    <p class="text-gray-400 text-sm">Insentif harga untuk petani yang menggunakan metode ramah lingkungan.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-20 bg-white relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#2f7d32_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.03]"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-tanira-green font-bold uppercase tracking-wider mb-2">Cerita Mitra</h2>
+                <h3 class="text-3xl md:text-4xl font-bold text-tanira-dark">Tumbuh Bersama Tanira</h3>
+                <p class="mt-4 text-tanira-gray max-w-2xl mx-auto">Dengar langsung bagaimana ekosistem ini mengubah hidup para petani dan pelaku usaha lokal.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Testimonial 1: Petani -->
+                <div class="bg-tanira-cream p-8 rounded-2xl border border-transparent hover:border-tanira-green/20 hover:shadow-lg transition duration-300 relative group reveal reveal-delay-100">
+                    <i class="fa-solid fa-quote-right absolute top-8 right-8 text-4xl text-tanira-brown/10 group-hover:text-tanira-green/20 transition"></i>
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop" alt="Pak Budi" class="w-14 h-14 rounded-full object-cover border-2 border-tanira-green p-0.5">
+                        <div>
+                            <h4 class="font-bold text-tanira-dark">Pak Budi Santoso</h4>
+                            <p class="text-xs text-tanira-gray font-medium">Petani Padi, Karawang</p>
+                        </div>
+                    </div>
+                    <p class="text-tanira-gray italic leading-relaxed mb-4">"Dulu tiap panen raya harga selalu anjlok. Sejak pakai fitur Pre-Order Tanira, harga jual gabah saya sudah dikunci sejak awal tanam. Hati tenang, untung jelas."</p>
+                    <div class="flex text-tanira-accent text-sm">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2: Pembeli UMKM -->
+                <div class="bg-tanira-cream p-8 rounded-2xl border border-transparent hover:border-tanira-green/20 hover:shadow-lg transition duration-300 relative group reveal reveal-delay-200">
+                    <i class="fa-solid fa-quote-right absolute top-8 right-8 text-4xl text-tanira-brown/10 group-hover:text-tanira-green/20 transition"></i>
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop" alt="Ibu Sari" class="w-14 h-14 rounded-full object-cover border-2 border-tanira-brown p-0.5">
+                        <div>
+                            <h4 class="font-bold text-tanira-dark">Ibu Sari Wijaya</h4>
+                            <p class="text-xs text-tanira-gray font-medium">Pemilik Katering, Bandung</p>
+                        </div>
+                    </div>
+                    <p class="text-tanira-gray italic leading-relaxed mb-4">"Sebagai pelaku UMKM, mencari suplai sayur segar yang konsisten itu susah. Di Tanira, saya bisa pesan langsung ke petani. Kualitas premium, harga tangan pertama."</p>
+                    <div class="flex text-tanira-accent text-sm">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3: Mitra Alat -->
+                <div class="bg-tanira-cream p-8 rounded-2xl border border-transparent hover:border-tanira-green/20 hover:shadow-lg transition duration-300 relative group reveal reveal-delay-300">
+                    <i class="fa-solid fa-quote-right absolute top-8 right-8 text-4xl text-tanira-brown/10 group-hover:text-tanira-green/20 transition"></i>
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop" alt="Mas Anton" class="w-14 h-14 rounded-full object-cover border-2 border-blue-500 p-0.5">
+                        <div>
+                            <h4 class="font-bold text-tanira-dark">Anton Pratama</h4>
+                            <p class="text-xs text-tanira-gray font-medium">Penyewaan Alsintan</p>
+                        </div>
+                    </div>
+                    <p class="text-tanira-gray italic leading-relaxed mb-4">"Marketplace alatnya sangat membantu! Traktor saya yang biasanya nganggur di gudang sekarang hampir tiap hari ada yang sewa lewat aplikasi. Sangat efisien."</p>
+                    <div class="flex text-tanira-accent text-sm">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="py-24 relative overflow-hidden">
+        <div class="absolute inset-0 bg-tanira-green"></div>
+        <!-- Decorative circles -->
+        <div class="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full mix-blend-overlay filter blur-xl -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-tanira-accent/20 rounded-full mix-blend-overlay filter blur-2xl translate-x-1/3 translate-y-1/3"></div>
+        
+        <div class="relative max-w-4xl mx-auto px-4 text-center reveal">
+            <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">Siap Panen Lebih Untung?</h2>
+            <p class="text-green-50 text-lg mb-10 max-w-2xl mx-auto">
+                Bergabunglah dengan ribuan petani modern lainnya. Jadwalkan tanam, kunci harga, dan nikmati kesejahteraan yang lebih baik.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <% if (user) { %>
+                    <a href="/dashboard" class="px-8 py-4 bg-white text-tanira-green rounded-full font-bold text-lg hover:bg-gray-100 hover:scale-105 transition shadow-lg">
+                        Buka Dashboard
+                    </a>
+                <% } else { %>
+                    <a href="/auth/register" class="px-8 py-4 bg-white text-tanira-green rounded-full font-bold text-lg hover:bg-gray-100 hover:scale-105 transition shadow-lg">
+                        Daftarkan Lahan Pertamamu
+                    </a>
+                <% } %>
+                <a href="#how-it-works" class="px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-bold text-lg hover:bg-white/10 transition">
+                    Pelajari Lebih Lanjut
+                </a>
+            </div>
+            <p class="mt-6 text-sm text-green-200 opacity-80">*Gratis biaya pendaftaran untuk 100 petani pertama bulan ini</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-tanira-cream border-t border-tanira-brown/10 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-12 mb-12">
+                <!-- Brand -->
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <img src="/logo/logo.png" 
+                             onerror="this.src='https://placehold.co/40x40/2f7d32/ffffff?text=T'"
+                             alt="Logo TANIRA" 
+                             class="w-10 h-10 rounded-lg object-contain p-1">
+                             
+                        <span class="font-bold text-2xl text-tanira-green">TANIRA</span>
+                    </div>
+                    <p class="text-tanira-gray text-sm leading-relaxed mb-6">
+                        Mewujudkan kedaulatan pangan dengan mensejahterakan petani melalui teknologi yang adil dan transparan.
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="https://www.instagram.com" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-tanira-gray hover:text-tanira-green hover:border-tanira-green transition"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="https://www.facebook.com" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-tanira-gray hover:text-tanira-green hover:border-tanira-green transition"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="https://www.youtube.com" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-tanira-gray hover:text-tanira-green hover:border-tanira-green transition"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <!-- Links -->
+                <div>
+                    <h4 class="font-bold text-tanira-dark mb-4">Perusahaan</h4>
+                    <ul class="space-y-3 text-sm text-tanira-gray">
+                        <li><a href="#" class="hover:text-tanira-green transition">Tentang Kami</a></li>
+                        <li><a href="#" class="hover:text-tanira-green transition">Tim</a></li>
+                        <li><a href="#" class="hover:text-tanira-green transition">Karir</a></li>
+                        <li><a href="#" class="hover:text-tanira-green transition">Hubungi Kami</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-tanira-dark mb-4">Produk</h4>
+                    <ul class="space-y-3 text-sm text-tanira-gray">
+                        <li><a href="#" class="hover:text-tanira-green transition">Pre-Order Panen</a></li>
+                        <li><a href="#" class="hover:text-tanira-green transition">Marketplace Alat</a></li>
+                        <li><a href="#" class="hover:text-tanira-green transition">Cek Harga Pasar</a></li>
+                        <li><a href="#" class="hover:text-tanira-green transition">Mitra UMKM</a></li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div>
+                    <h4 class="font-bold text-tanira-dark mb-4">Kabar Tani</h4>
+                    <p class="text-sm text-tanira-gray mb-4">Dapatkan info harga pasar terbaru setiap minggu.</p>
+                    <form class="flex gap-2">
+                        <input type="email" placeholder="Email Anda" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-tanira-green text-sm">
+                        <button class="bg-tanira-green text-white px-4 py-2 rounded-lg hover:bg-tanira-greenDark transition">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-200 pt-8 text-center text-sm text-tanira-gray flex flex-col md:flex-row justify-between items-center gap-4">
+                <p>&copy; 2026 TANIRA Indonesia. All rights reserved.</p>
+                <div class="flex gap-6">
+                    <a href="#" class="hover:text-tanira-green">Kebijakan Privasi</a>
+                    <a href="#" class="hover:text-tanira-green">Syarat & Ketentuan</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Mobile Menu Toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // Navbar Scroll Effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 10) {
+                navbar.classList.add('shadow-md');
+                navbar.classList.remove('py-4');
+                navbar.classList.add('py-2');
+            } else {
+                navbar.classList.remove('shadow-md');
+                navbar.classList.remove('py-2');
+                navbar.classList.add('py-4');
+            }
+        });
+
+        // --- ANIMATION ON SCROLL SCRIPT ---
+        // Menggunakan Intersection Observer API untuk performa yang lebih baik
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                threshold: 0.1, // Animasi mulai saat 10% elemen terlihat
+                rootMargin: "0px 0px -50px 0px" // Sedikit offset dari bawah
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        // Opsional: Hentikan observe jika ingin animasi hanya terjadi sekali
+                        observer.unobserve(entry.target); 
+                    }
+                });
+            }, observerOptions);
+
+            const revealElements = document.querySelectorAll('.reveal');
+            revealElements.forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>

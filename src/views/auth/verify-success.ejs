@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Berhasil - TANIRA</title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <!-- Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons: FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/css/output.css">
+    <link rel="stylesheet" href="/css/custom.css">
+    
+    <!-- Config (Sama seperti halaman lain) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0, 0, 0, 0.08)',
+                    },
+                    animation: {
+                        'scale-in': 'scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'bounce-slow': 'bounce 2s infinite',
+                    },
+                    keyframes: {
+                        scaleIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.9)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+
+    <!-- Background Decoration -->
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-tanira-green/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-tanira-brown/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- MAIN CARD -->
+    <main class="w-full max-w-md bg-white rounded-3xl shadow-soft p-8 md:p-12 text-center relative z-10 animate-scale-in">
+        
+        <!-- Success Icon -->
+        <div class="flex justify-center mb-6">
+            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center relative">
+                <div class="absolute inset-0 border-4 border-white rounded-full shadow-sm"></div>
+                <i class="fa-solid fa-check text-5xl text-tanira-green animate-bounce-slow"></i>
+            </div>
+        </div>
+
+        <!-- Text Content -->
+        <h1 class="text-3xl font-extrabold text-tanira-dark mb-3">Selamat! 🎉</h1>
+        <h2 class="text-lg font-semibold text-tanira-green mb-4">Email Berhasil Diverifikasi</h2>
+        
+        <p class="text-tanira-gray text-sm leading-relaxed mb-8">
+            Akun Anda kini telah aktif sepenuhnya. Silakan masuk untuk mulai menjelajahi ekosistem Tanira.
+        </p>
+
+        <!-- Primary Action -->
+        <a href="/auth/login" class="block w-full bg-tanira-green hover:bg-[#1B5E20] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-tanira-green/30 transition transform hover:-translate-y-1 mb-4 flex items-center justify-center gap-2 group">
+            Masuk ke Akun Saya 
+            <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+        </a>
+
+        <p class="text-xs text-gray-400 mt-6">
+            Otomatis kembali ke beranda dalam <span id="countdown">10</span> detik...
+        </p>
+
+    </main>
+
+    <!-- Auto Redirect Script -->
+    <script>
+        let timeLeft = 10;
+        const countdownEl = document.getElementById('countdown');
+        
+        const timer = setInterval(() => {
+            timeLeft--;
+            countdownEl.innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                window.location.href = '/auth/login';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

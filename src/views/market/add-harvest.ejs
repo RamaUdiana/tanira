@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    <!-- ... Head sama ... -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32', greenLight: '#E8F5E9', greenDark: '#1B5E20',
+                            brown: '#6D4C41', cream: '#F9F7F2', dark: '#1F2937', gray: '#6B7280', accent: '#F59E0B',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)', 'card': '0 10px 15px -3px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24 md:pb-10">
+
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+        <div class="max-w-5xl mx-auto flex items-center gap-4">
+            <a href="/dashboard" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-tanira-dark">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-lg leading-none">Jual Hasil Panen</h1>
+                <p class="text-xs text-tanira-gray mt-0.5"><%= plan ? 'Dari Smart Planting' : 'Input Manual' %></p>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 py-8">
+        
+        <div class="grid lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- LEFT COLUMN: FORM -->
+            <div class="lg:col-span-7 space-y-8">
+                
+                <!-- Context Card -->
+                <section>
+                    <h2 class="text-2xl font-bold text-tanira-dark mb-2">Buat Penawaran Pre-Order</h2>
+                    <p class="text-tanira-gray mb-6">
+                        <%= plan ? 'Ubah rencana tanam Anda menjadi penawaran Pre-Order.' : 'Jual hasil panen Anda secara langsung kepada pembeli.' %>
+                    </p>
+
+                    <% if (plan) { %>
+                        <!-- Mode Plan: Show Context -->
+                        <div class="bg-white border-l-4 border-tanira-brown rounded-r-xl shadow-sm p-4 flex items-center gap-4">
+                            <div class="w-12 h-12 bg-tanira-cream rounded-lg flex items-center justify-center text-tanira-brown text-xl">
+                                <i class="fa-solid fa-clipboard-list"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Sumber Data</p>
+                                <h3 class="font-bold text-tanira-dark">Rencana Tanam #RT-<%= plan.id %></h3>
+                                <p class="text-sm text-tanira-gray"><%= plan.crop.name %> • <%= plan.landArea %> Hektar</p>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <!-- Mode Manual: Info Box -->
+                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3 items-start">
+                            <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+                            <div>
+                                <h4 class="font-bold text-blue-800 text-sm">Mode Manual</h4>
+                                <p class="text-xs text-blue-600 mt-1">Anda memasukkan data panen secara manual. Pastikan estimasi akurat.</p>
+                            </div>
+                        </div>
+                    <% } %>
+                </section>
+
+                <!-- MAIN FORM -->
+                <section>
+                    <form id="harvestForm" class="bg-white rounded-2xl shadow-card p-6 md:p-8 space-y-6" enctype="multipart/form-data">
+                        
+                        <input type="hidden" id="planId" value="<%= plan ? plan.id : '' %>">
+                        
+                        <!-- DINAMIS: Input Nama Tanaman -->
+                        <% if (plan) { %>
+                            <!-- JIKA DARI PLAN: Hidden ID dan Tampilan Readonly -->
+                            <input type="hidden" id="cropId" value="<%= plan.cropId %>">
+                            <input type="hidden" id="cropName" value="<%= plan.crop.name %>">
+                            
+                            <div>
+                                <label class="block text-sm font-bold text-tanira-dark mb-2">Komoditas</label>
+                                <input type="text" value="<%= plan.crop.name %>" readonly class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-500 cursor-not-allowed">
+                            </div>
+
+                        <% } else { %>
+                            <!-- JIKA MANUAL: Dropdown Pilihan -->
+                            <div>
+                                <label class="block text-sm font-bold text-tanira-dark mb-2">Pilih Komoditas <span class="text-red-500">*</span></label>
+                                <select id="cropIdSelect" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-tanira-green focus:outline-none bg-white cursor-pointer" onchange="handleCropChange()">
+                                    <option value="" disabled selected>-- Pilih Tanaman --</option>
+                                    <% crops.forEach(crop => { %>
+                                        <option value="<%= crop.id %>" data-name="<%= crop.name %>"><%= crop.name %></option>
+                                    <% }) %>
+                                    <option value="custom" class="font-bold text-tanira-brown">+ Tanaman Lainnya (Ketik Manual)</option>
+                                </select>
+                                
+                                <!-- Input Manual (Hidden by default) -->
+                                <div id="customCropContainer" class="hidden mt-3">
+                                    <label class="block text-xs font-bold text-gray-500 mb-1">Nama Tanaman Baru <span class="text-red-500">*</span></label>
+                                    <input type="text" id="customCropName" placeholder="Misal: Melon Golden" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-tanira-brown focus:outline-none" oninput="updatePreview()">
+                                </div>
+
+                                <input type="hidden" id="cropName" value="">
+                                <input type="hidden" id="cropId" value="">
+                            </div>
+                        <% } %>
+
+                        <!-- FOTO UPLOAD -->
+                        <div>
+                            <label class="block text-sm font-bold text-tanira-dark mb-2">Foto Tanaman Terbaru</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-tanira-green transition bg-gray-50 cursor-pointer" onclick="document.getElementById('input-image').click()">
+                                <input type="file" id="input-image" name="image" accept="image/*" class="hidden" onchange="previewImage(this)">
+                                <div id="upload-placeholder">
+                                    <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 mx-auto mb-3">
+                                        <i class="fa-solid fa-camera"></i>
+                                    </div>
+                                    <p class="text-sm text-gray-500 font-medium">Klik untuk upload foto</p>
+                                    <p class="text-xs text-gray-400 mt-1">JPG, PNG (Max 5MB)</p>
+                                </div>
+                                <div id="image-preview-container" class="hidden relative w-full h-48 rounded-lg overflow-hidden">
+                                    <img id="image-preview-src" src="" class="w-full h-full object-cover">
+                                    <button type="button" onclick="removeImage(event)" class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 transition">
+                                        <i class="fa-solid fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- QTY -->
+                        <div>
+                            <label class="block text-sm font-bold text-tanira-dark mb-2">Estimasi Total Panen <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <!-- Value: Jika plan ada, ambil dari plan, jika tidak kosong -->
+                                <input type="number" id="input-qty" value="<%= plan ? (plan.expectedYield * 1000) : '' %>" placeholder="Contoh: 5000" class="w-full pl-4 pr-16 py-3 rounded-xl border border-gray-200 focus:border-tanira-green focus:outline-none transition font-semibold text-lg" oninput="updatePreview()">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400 font-bold bg-gray-50 rounded-r-xl border-l border-gray-200 px-3">Kg</div>
+                            </div>
+                        </div>
+
+                        <!-- HARGA -->
+                        <div>
+                            <label class="block text-sm font-bold text-tanira-dark mb-2">Harga Pre-Order per Kg <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-tanira-dark font-bold">Rp</div>
+                                <input type="number" id="input-price" placeholder="45000" class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-tanira-green focus:outline-none transition font-semibold text-lg text-tanira-green" oninput="updatePreview()">
+                            </div>
+                            <div class="flex justify-between items-center mt-2">
+                                <p class="text-xs font-bold text-tanira-dark bg-gray-100 px-2 py-1 rounded">
+                                    Potensi Omzet: <span id="calc-revenue">Rp 0</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- DATE -->
+                            <div>
+                                <label class="block text-sm font-bold text-tanira-dark mb-2">Perkiraan Panen Raya <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <input type="date" id="input-date" value="<%= plan ? new Date(plan.estimatedHarvest).toISOString().split('T')[0] : '' %>" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-tanira-green focus:outline-none transition text-tanira-dark" onchange="updatePreview()">
+                                </div>
+                            </div>
+
+                            <!-- MIN ORDER -->
+                            <div>
+                                <label class="block text-sm font-bold text-tanira-dark mb-2">Minimal Pemesanan <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <input type="number" id="input-min" placeholder="50" value="50" class="w-full pl-4 pr-12 py-3 rounded-xl border border-gray-200 focus:border-tanira-green focus:outline-none transition">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400 font-medium">Kg</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DESC -->
+                        <div>
+                            <label class="block text-sm font-bold text-tanira-dark mb-2">Catatan untuk Pembeli</label>
+                            <textarea id="input-desc" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-tanira-green focus:outline-none transition text-sm" placeholder="Contoh: Panen kualitas super, bebas pestisida kimia..."></textarea>
+                        </div>
+
+                    </form>
+                </section>
+            </div>
+
+            <!-- RIGHT COLUMN: PREVIEW -->
+            <div class="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-tanira-accent animate-pulse"></span>
+                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Preview</h3>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-card overflow-hidden border border-gray-100">
+                    <div class="h-48 bg-gray-200 relative overflow-hidden group">
+                        <img id="card-preview-img" src="https://placehold.co/600x400?text=Foto+Tanaman" alt="Preview" class="w-full h-full object-cover">
+                        <div class="absolute top-3 left-3 flex gap-2">
+                            <span class="bg-tanira-accent text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">Pre-Order</span>
+                        </div>
+                    </div>
+
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h3 class="text-lg font-bold text-tanira-dark leading-tight" id="preview-name"><%= plan ? plan.crop.name : 'Nama Tanaman' %></h3>
+                                <p class="text-xs text-tanira-gray mt-1">Estimasi Panen: <span id="preview-date" class="font-semibold text-tanira-green">--</span></p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 flex items-end justify-between border-t border-gray-100 pt-4">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-0.5">Harga Pre-Order</p>
+                                <p class="text-xl font-bold text-tanira-green" id="preview-price">Rp 0 <span class="text-xs text-gray-400 font-normal">/kg</span></p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-400 mb-0.5">Sisa Kuota</p>
+                                <p class="text-sm font-bold text-tanira-dark" id="preview-qty">0 Kg</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-tanira-green/5 p-4 rounded-xl border border-tanira-green/20">
+                    <button id="btn-publish" onclick="publishListing()" class="w-full bg-tanira-green hover:bg-tanira-greenDark text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                        Publikasikan Pre-Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 flex items-center w-full max-w-xs p-4 space-x-4 bg-white rounded-xl shadow-2xl border hidden z-50 transition-all duration-300 translate-y-[-20px] opacity-0">
+        <div id="toast-icon" class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg"></div>
+        <div class="ml-3 text-sm font-normal text-tanira-dark" id="toast-message"></div>
+    </div>
+
+    <script>
+        // References & Helpers
+        const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
+        const formatDate = (dateStr) => dateStr ? new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : "--";
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const msg = document.getElementById('toast-message');
+            msg.innerText = message;
+            
+            if (type === 'success') {
+                toast.classList.add('border-green-100');
+                icon.className = "w-8 h-8 flex items-center justify-center text-green-500 bg-green-100 rounded-lg";
+                icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else {
+                toast.classList.add('border-red-100');
+                icon.className = "w-8 h-8 flex items-center justify-center text-red-500 bg-red-100 rounded-lg";
+                icon.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            }
+
+            toast.classList.remove('hidden');
+            requestAnimationFrame(() => toast.classList.remove('translate-y-[-20px]', 'opacity-0'));
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-20px]', 'opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        // Logic Manual Crop Selection
+        function handleCropChange() {
+            const select = document.getElementById('cropIdSelect');
+            const customContainer = document.getElementById('customCropContainer');
+            const cropNameInput = document.getElementById('cropName');
+            const cropIdInput = document.getElementById('cropId');
+            
+            const selectedOption = select.options[select.selectedIndex];
+            
+            if (select.value === 'custom') {
+                customContainer.classList.remove('hidden');
+                cropIdInput.value = ''; // Kosongkan ID agar controller tahu ini baru
+                cropNameInput.value = '';
+            } else {
+                customContainer.classList.add('hidden');
+                cropIdInput.value = select.value;
+                cropNameInput.value = selectedOption.getAttribute('data-name');
+                updatePreview();
+            }
+        }
+
+        // Update UI Preview
+        function updatePreview() {
+            const nameFromSelect = document.getElementById('cropName') ? document.getElementById('cropName').value : '';
+            const nameFromCustom = document.getElementById('customCropName') ? document.getElementById('customCropName').value : '';
+            // Prioritas: Manual Input > Select > Default
+            const name = nameFromCustom || nameFromSelect || 'Nama Tanaman';
+            
+            document.getElementById('preview-name').innerText = name;
+            
+            const qty = document.getElementById('input-qty').value || 0;
+            const price = document.getElementById('input-price').value || 0;
+            const date = document.getElementById('input-date').value;
+
+            document.getElementById('preview-qty').innerText = new Intl.NumberFormat('id-ID').format(qty) + " Kg";
+            document.getElementById('preview-price').innerHTML = `${formatIDR(price)} <span class="text-xs text-gray-400 font-normal">/kg</span>`;
+            document.getElementById('preview-date').innerText = formatDate(date);
+
+            const revenue = qty * price;
+            const elRev = document.getElementById('calc-revenue');
+            elRev.innerText = formatIDR(revenue);
+            
+            if(revenue > 0) elRev.classList.replace('text-tanira-dark', 'text-tanira-green');
+            else elRev.classList.replace('text-tanira-green', 'text-tanira-dark');
+        }
+
+        // Image Handling
+        function previewImage(input) {
+            const file = input.files[0];
+            if(file) {
+                if(file.size > 5*1024*1024) { showToast('File maks 5MB', 'error'); input.value=''; return; }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('upload-placeholder').classList.add('hidden');
+                    document.getElementById('image-preview-container').classList.remove('hidden');
+                    document.getElementById('image-preview-src').src = e.target.result;
+                    document.getElementById('card-preview-img').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        function removeImage(e) {
+            e.stopPropagation();
+            document.getElementById('input-image').value = '';
+            document.getElementById('upload-placeholder').classList.remove('hidden');
+            document.getElementById('image-preview-container').classList.add('hidden');
+            document.getElementById('card-preview-img').src = 'https://placehold.co/600x400?text=Foto+Tanaman';
+        }
+
+        // Submit
+        async function publishListing() {
+            const btn = document.getElementById('btn-publish');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Memproses...';
+
+            const formData = new FormData();
+            
+            // Logic ambil crop data (Plan vs Manual)
+            const planId = document.getElementById('planId').value;
+            let cropId, customName;
+
+            if (planId) {
+                // Mode Plan
+                cropId = document.getElementById('cropId').value;
+            } else {
+                // Mode Manual
+                const select = document.getElementById('cropIdSelect');
+                if (select.value === 'custom') {
+                    customName = document.getElementById('customCropName').value;
+                    if(!customName) { showToast('Nama tanaman wajib diisi', 'error'); btn.disabled=false; btn.innerHTML=originalText; return; }
+                } else {
+                    cropId = select.value;
+                    if(!cropId) { showToast('Pilih tanaman', 'error'); btn.disabled=false; btn.innerHTML=originalText; return; }
+                }
+            }
+
+            formData.append('planId', planId);
+            if(cropId) formData.append('cropId', cropId);
+            if(customName) formData.append('customCropName', customName);
+            
+            formData.append('quantity', document.getElementById('input-qty').value);
+            formData.append('price', document.getElementById('input-price').value);
+            formData.append('harvestDate', document.getElementById('input-date').value);
+            formData.append('minOrder', document.getElementById('input-min').value);
+            formData.append('description', document.getElementById('input-desc').value);
+            
+            const fileInput = document.getElementById('input-image');
+            if(fileInput.files[0]) formData.append('image', fileInput.files[0]);
+
+            try {
+                const res = await fetch('/market/add-harvest', { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                if(data.success) {
+                    showToast('Berhasil! Listing tayang.', 'success');
+                    setTimeout(() => window.location.href = data.redirectUrl, 1500);
+                } else {
+                    showToast('Gagal: ' + data.message, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            } catch(e) {
+                console.error(e);
+                showToast('Error koneksi', 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        };
+
+        // Init
+        // Jika mode manual, attach event listener tambahan jika perlu
+        updatePreview();
+    </script>
+</body>
+</html>

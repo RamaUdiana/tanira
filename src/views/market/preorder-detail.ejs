@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32', greenLight: '#E8F5E9', greenDark: '#1B5E20',
+                            brown: '#6D4C41', cream: '#F9F7F2', dark: '#1F2937',
+                            gray: '#6B7280', accent: '#F59E0B', surface: '#FFFFFF',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-enter { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .delay-100 { animation-delay: 100ms; } .delay-200 { animation-delay: 200ms; } .delay-300 { animation-delay: 300ms; }
+        .progress-bar-fill { transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1); width: 0; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24 md:pb-10">
+
+    <!-- NAVIGATION -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+        <div class="max-w-3xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="/market/my-preorders" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-tanira-dark">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="font-bold text-lg leading-none">Detail Manajemen</h1>
+                    <p class="text-xs text-tanira-gray mt-0.5">#HL-<%= listing.id %></p>
+                </div>
+            </div>
+            
+            <button onclick="shareLink()" class="w-10 h-10 rounded-full bg-gray-100 text-tanira-dark flex items-center justify-center transition hover:bg-tanira-green hover:text-white" title="Bagikan Link">
+                <i class="fa-solid fa-share-nodes"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-3xl mx-auto px-4 py-6 space-y-6">
+
+        <!-- 1. HEADER PRE-ORDER -->
+        <section class="animate-enter bg-white rounded-2xl p-6 shadow-soft relative overflow-hidden">
+            <div class="flex flex-col md:flex-row gap-6 items-start">
+                <div class="w-full md:w-24 h-32 md:h-24 rounded-xl overflow-hidden shrink-0 bg-gray-100">
+                    <img src="<%= imageUrl %>" 
+                         alt="<%= listing.crop.name %>" 
+                         class="w-full h-full object-cover"
+                         onerror="this.onerror=null; this.src='https://placehold.co/200?text=No+Image';">
+                </div>
+                
+                <div class="flex-1 w-full">
+                    <div class="flex justify-between items-start mb-2">
+                        <h2 class="text-2xl font-bold text-tanira-dark"><%= listing.crop.name %></h2>
+                        <span class="bg-<%= stats.statusMeta.color %>-100 text-<%= stats.statusMeta.color %>-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm flex items-center gap-1">
+                            <i class="fa-solid <%= stats.statusMeta.icon %>"></i> <%= stats.statusMeta.text %>
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Harga / Kg</p>
+                            <p class="text-lg font-bold text-tanira-green"><%= helpers.formatRupiah(listing.price) %></p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Estimasi Panen</p>
+                            <p class="text-lg font-bold text-tanira-dark"><%= helpers.formatDate(listing.harvestDate) %></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. PROGRESS PRE-ORDER -->
+        <section class="animate-enter delay-100 bg-white rounded-2xl p-6 shadow-soft border border-gray-50">
+            <div class="flex justify-between items-end mb-2">
+                <div>
+                    <h3 class="font-bold text-tanira-dark">Progress Pemesanan</h3>
+                    <p class="text-xs text-tanira-gray">Total <%= listing.orders.length %> pesanan masuk</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-2xl font-bold text-tanira-dark"><%= stats.booked.toLocaleString('id-ID') %></span>
+                    <span class="text-sm text-gray-400 font-medium">/ <%= listing.quantity.toLocaleString('id-ID') %> Kg</span>
+                </div>
+            </div>
+            
+            <div class="w-full h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+                <div id="progress-bar" 
+                     class="progress-bar-fill h-full bg-gradient-to-r from-tanira-green to-tanira-greenLight rounded-full relative" 
+                     style="width: 0%" 
+                     data-width="<%= stats.progress %>%">
+                    <div class="absolute inset-0 bg-white/20 w-full h-full animate-pulse"></div>
+                </div>
+            </div>
+            
+            <div class="flex gap-4 mt-4 text-xs font-medium text-gray-500">
+                <div class="flex items-center gap-1.5">
+                    <div class="w-2 h-2 rounded-full bg-tanira-green"></div> Terpesan (<%= stats.progress %>%)
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <div class="w-2 h-2 rounded-full bg-gray-200"></div> Sisa Kuota
+                </div>
+            </div>
+        </section>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            
+            <!-- 3. RINGKASAN RENCANA -->
+            <section class="animate-enter delay-200 bg-tanira-cream border border-tanira-brown/10 rounded-2xl p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fa-solid fa-clipboard-list text-tanira-brown"></i>
+                    <h3 class="font-bold text-tanira-brown text-sm uppercase tracking-wide">Data Lahan</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between border-b border-tanira-brown/10 pb-2">
+                        <span class="text-sm text-gray-500">Luas Lahan</span>
+                        <span class="text-sm font-bold text-tanira-dark"><%= listing.user.farmerProfile ? listing.user.farmerProfile.landArea + ' Ha' : '-' %></span>
+                    </div>
+                    <div class="flex justify-between border-b border-tanira-brown/10 pb-2">
+                        <span class="text-sm text-gray-500">Lokasi</span>
+                        <span class="text-sm font-bold text-tanira-dark"><%= listing.user.farmerProfile ? listing.user.farmerProfile.location : '-' %></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-500">Potensi Omzet</span>
+                        <span class="text-xs font-bold bg-green-100 text-tanira-green px-2 py-0.5 rounded">
+                            <%= helpers.formatRupiah(stats.revenuePotential) %>
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. DAFTAR PEMESAN -->
+            <section class="animate-enter delay-200 bg-white rounded-2xl p-6 shadow-soft relative min-h-[250px]">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-tanira-dark">Pemesan Terbaru</h3>
+                    <% if (listing.orders.length > 5) { %>
+                    <a href="#" class="text-xs text-tanira-green font-bold hover:underline">Lihat Semua</a>
+                    <% } %>
+                </div>
+
+                <% if (listing.orders.length > 0) { %>
+                    <div class="space-y-3 max-h-60 overflow-y-auto pr-2 no-scrollbar">
+                        <% listing.orders.forEach(order => { %>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-green-50 transition duration-300">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-tanira-green/10 flex items-center justify-center text-tanira-green font-bold text-xs uppercase border border-tanira-green/20">
+                                    <%= order.buyer.name.substring(0, 2) %>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-tanira-dark"><%= order.buyer.name %></p>
+                                    <p class="text-[10px] text-gray-400"><%= helpers.formatDate(order.createdAt) %></p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-tanira-green"><%= order.quantity %> Kg</p>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-500 uppercase"><%= order.status %></span>
+                            </div>
+                        </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-white rounded-2xl z-10">
+                        <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 text-xl mb-3">
+                            <i class="fa-regular fa-user"></i>
+                        </div>
+                        <p class="text-sm font-bold text-tanira-dark">Belum ada pemesan</p>
+                        <p class="text-xs text-gray-400 mt-1 mb-4">Bagikan link pre-order Anda ke grup tani atau media sosial.</p>
+                        <button onclick="shareLink()" class="px-4 py-2 bg-gray-100 text-tanira-dark text-xs font-bold rounded-lg hover:bg-gray-200 transition flex items-center gap-2">
+                            <i class="fa-solid fa-share-nodes"></i> Bagikan Link
+                        </button>
+                    </div>
+                <% } %>
+            </section>
+
+        </div>
+
+        <!-- 5. AKSI PETANI -->
+        <section class="animate-enter delay-300 pb-8">
+            <div class="bg-white rounded-2xl p-6 shadow-soft border-t border-gray-100">
+                <h3 class="font-bold text-tanira-dark mb-4">Pengaturan Pre-Order</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <a href="/market/edit/<%= listing.id %>" class="py-3 px-4 border border-gray-300 text-tanira-dark font-bold rounded-xl hover:bg-gray-50 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-gray-500"></i> Edit Info
+                    </a>
+                    
+                    <a href="/market/status/<%= listing.id %>" class="py-3 px-4 bg-tanira-green text-white font-bold rounded-xl hover:bg-tanira-greenDark transition flex items-center justify-center gap-2 shadow-lg shadow-tanira-green/20">
+                        <i class="fa-solid fa-seedling"></i> Update Status Panen
+                    </a>
+
+                    <!-- Tombol Buka Modal -->
+                    <% if (listing.status === 'active') { %>
+                    <button onclick="openCloseModal()" id="btn-close" class="py-3 px-4 bg-red-50 text-red-600 border border-red-100 font-bold rounded-xl hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-ban"></i> Tutup Pre-Order
+                    </button>
+                    <% } else { %>
+                    <button disabled class="py-3 px-4 bg-gray-100 text-gray-400 font-bold rounded-xl flex items-center justify-center gap-2 cursor-not-allowed">
+                        <i class="fa-solid fa-lock"></i> Pre-Order Ditutup
+                    </button>
+                    <% } %>
+                </div>
+                <p class="text-[10px] text-gray-400 mt-3 text-center md:text-left">
+                    <i class="fa-solid fa-circle-info mr-1"></i>
+                    Menutup pre-order akan menghentikan pesanan baru masuk. Lakukan jika kuota sudah habis atau panen dibatalkan.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- CONFIRMATION MODAL -->
+    <div id="confirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity opacity-0" id="modalBackdrop"></div>
+        
+        <!-- Modal Content -->
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm relative z-10 transform scale-95 opacity-0 transition-all duration-300 p-6" id="modalContent">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-500 text-xl mb-4 mx-auto">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            
+            <h3 class="text-xl font-bold text-tanira-dark text-center mb-2">Tutup Pre-Order?</h3>
+            <p class="text-sm text-center text-tanira-gray mb-6">
+                Tindakan ini tidak dapat dibatalkan. Pembeli tidak akan bisa memesan lagi.
+            </p>
+
+            <div class="flex flex-col gap-3">
+                <button onclick="closePreOrder()" class="w-full py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition flex justify-center items-center gap-2">
+                    <span id="modalBtnText">Ya, Tutup Sekarang</span>
+                </button>
+                <button onclick="closeModal()" class="w-full py-3 rounded-xl text-gray-500 font-bold hover:bg-gray-50 transition">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 flex items-center w-full max-w-xs p-4 space-x-4 bg-white rounded-xl shadow-2xl border hidden z-50 transition-all duration-300 translate-y-[-20px] opacity-0" role="alert">
+        <div id="toast-icon" class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg"></div>
+        <div class="ml-3 text-sm font-normal text-tanira-dark" id="toast-message"></div>
+    </div>
+
+    <!-- JS Logic -->
+    <script>
+        const listingId = <%= listing.id %>;
+        
+        // --- ANIMATIONS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const bar = document.getElementById('progress-bar');
+                if(bar) {
+                    const width = bar.getAttribute('data-width');
+                    bar.style.width = width + '%';
+                }
+            }, 300);
+        });
+
+        // --- TOAST FUNCTION ---
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const msg = document.getElementById('toast-message');
+
+            // Set Content
+            msg.innerText = message;
+            
+            if (type === 'success') {
+                toast.classList.add('border-green-100');
+                icon.className = "inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg";
+                icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else {
+                toast.classList.add('border-red-100');
+                icon.className = "inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg";
+                icon.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+            }
+
+            // Show Animation
+            toast.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-[-20px]', 'opacity-0');
+            });
+            
+            // Hide after 3s
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-20px]', 'opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        // --- MODAL FUNCTIONS ---
+        const modal = document.getElementById('confirmModal');
+        const backdrop = document.getElementById('modalBackdrop');
+        const content = document.getElementById('modalContent');
+
+        function openCloseModal() {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            backdrop.classList.add('opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // --- ACTIONS ---
+
+        // 1. Share Link
+        function shareLink() {
+            const url = `${window.location.origin}/market/harvest/${listingId}`;
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(url).then(() => showToast("Link berhasil disalin!"));
+            } else {
+                const textArea = document.createElement("textarea");
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast("Link berhasil disalin!");
+            }
+        }
+
+        // 2. Close Pre-Order (API Call)
+        async function closePreOrder() {
+            const btnText = document.getElementById('modalBtnText');
+            const btn = btnText.parentElement;
+            
+            btn.disabled = true;
+            btnText.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Memproses...';
+
+            try {
+                const response = await fetch('/market/edit/' + listingId, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        status: 'sold', 
+                        price: <%= listing.price %>,
+                        harvestDate: "<%= listing.harvestDate.toISOString() %>",
+                        minOrder: <%= listing.minOrder %>
+                    })
+                });
+
+                const result = await response.json();
+                
+                if(result.success) {
+                    closeModal();
+                    showToast("Pre-Order berhasil ditutup.");
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    closeModal();
+                    showToast(result.message || "Gagal menutup pre-order.", "error");
+                }
+
+            } catch (err) {
+                console.error(err);
+                closeModal();
+                showToast("Terjadi kesalahan koneksi.", "error");
+            } finally {
+                // Reset button state just in case
+                btn.disabled = false;
+                btnText.innerText = "Ya, Tutup Sekarang";
+            }
+        }
+    </script>
+</body>
+</html>

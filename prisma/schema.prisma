@@ -1,0 +1,222 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  petani
+  pembeli
+  penyedia
+  admin
+  none
+}
+
+enum TrendStatus {
+  naik
+  stabil
+  turun
+}
+
+enum RiskLevel {
+  rendah
+  sedang
+  tinggi
+}
+
+enum ListingStatus {
+  draft
+  active
+  sold
+}
+
+enum OrderStatus {
+  pending
+  paid
+  finished
+}
+
+enum BookingStatus {
+  booked
+  completed
+  pending
+}
+
+enum ReviewTarget {
+  harvest
+  tool
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  role      UserRole  @default(none)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  phone String? 
+  province     String?
+
+  isVerified        Boolean   @default(false)
+  verificationToken String?   @db.Text
+
+  farmerProfile  FarmerProfile?
+  plantingPlans  PlantingPlan[]
+  harvestListings HarvestListing[]
+  toolListings   ToolListing[]
+  orders         Order[]        @relation("BuyerOrders")
+  toolBookings   ToolBooking[]
+  reviews        Review[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model FarmerProfile {
+  id        Int    @id @default(autoincrement())
+  userId    Int    @unique
+  location  String
+  landArea  Float
+  landType  String
+  season    String
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Crop {
+  id               Int          @id @default(autoincrement())
+  name             String
+  category         String
+  growthDuration   Int
+  avgYieldPerHa    Float
+
+  trends           CropTrend[]
+  plantingPlans    PlantingPlan[]
+  harvestListings  HarvestListing[]
+}
+
+model CropTrend {
+  id          Int         @id @default(autoincrement())
+  cropId      Int
+  region      String
+  trendStatus TrendStatus
+  riskLevel   RiskLevel
+  avgPrice    Float
+
+  crop Crop @relation(fields: [cropId], references: [id])
+}
+
+model PlantingPlan {
+  id              Int        @id @default(autoincrement())
+  userId          Int
+  cropId          Int
+  landArea        Float
+  estimatedHarvest DateTime
+  expectedYield   Float
+  expectedProfit  Float
+  riskLevel       RiskLevel
+
+  user User @relation(fields: [userId], references: [id])
+  crop Crop @relation(fields: [cropId], references: [id])
+}
+
+model HarvestListing {
+  id          Int           @id @default(autoincrement())
+  userId      Int
+  cropId      Int
+  quantity    Float
+  price       Float
+  harvestDate DateTime
+  status      ListingStatus
+  approved    Boolean       @default(false)
+
+  minOrder    Float         @default(1) 
+  description String?       @db.Text
+  imageUrl    String?
+  progressStage  Int       @default(0) // 0:Persiapan, 1:Tanam, 2:Rawat, 3:Jelang Panen, 4:Panen
+  lastLogMessage String?   @db.Text    // Catatan update terakhir (misal: "Sudah dipupuk")
+  lastLogDate    DateTime?             // Waktu update terakhir
+
+  user   User   @relation(fields: [userId], references: [id])
+  crop   Crop   @relation(fields: [cropId], references: [id])
+  orders Order[]
+  reviews Review[]
+}
+
+model Order {
+  id         Int         @id @default(autoincrement())
+  listingId Int
+  buyerId   Int
+  quantity  Float
+  totalPrice Float
+  status    OrderStatus
+  createdAt DateTime    @default(now())
+
+  listing HarvestListing @relation(fields: [listingId], references: [id])
+  buyer   User           @relation("BuyerOrders", fields: [buyerId], references: [id])
+}
+
+model ToolListing {
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  toolName     String
+
+  category     String    @default("Alat Berat") // Kategori alat
+  transactionType String @default("sewa") 
+  description  String?   @db.Text
+  imageUrl     String?   // Foto alat
+  
+  location     String
+  pricePerDay  Float
+  availability Boolean   @default(true)
+
+  user      User         @relation(fields: [userId], references: [id])
+  bookings  ToolBooking[]
+  reviews   Review[]
+}
+
+model ToolBooking {
+  id        Int           @id @default(autoincrement())
+  toolId    Int
+  userId    Int
+  startDate DateTime
+  endDate   DateTime
+  status    BookingStatus
+  createdAt DateTime      @default(now())
+
+  tool ToolListing @relation(fields: [toolId], references: [id])
+  user User        @relation(fields: [userId], references: [id])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+
+  harvestListingId Int?
+  toolListingId    Int?
+
+  user User @relation(fields: [userId], references: [id])
+
+  harvestListing HarvestListing? @relation(fields: [harvestListingId], references: [id], map: "fk_review_harvest")
+
+  toolListing ToolListing? @relation(fields: [toolListingId], references: [id], map: "fk_review_tool")
+}
+
+model PasswordResetToken {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  token       String  @unique
+  expiresAt   DateTime
+  lastResendAt DateTime?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}

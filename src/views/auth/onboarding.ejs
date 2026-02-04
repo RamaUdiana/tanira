@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selamat Datang di TANIRA</title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32',
+                            greenLight: '#E8F5E9',
+                            greenDark: '#1B5E20',
+                            brown: '#6D4C41',
+                            cream: '#F9F7F2',
+                            dark: '#1F2937',
+                            gray: '#9CA3AF',
+                            accent: '#F59E0B',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .animate-fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .animate-slide-out { animation: slideOutLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .animate-slide-in { animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideOutLeft { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(-50px); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+
+        .role-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .role-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .role-card.active { border-color: #2F7D32; background-color: #F0FDF4; box-shadow: 0 0 0 2px #2F7D32; }
+        .role-card.active .icon-container { background-color: #2F7D32; color: white; transform: scale(1.1); }
+        .role-card.active .check-icon { opacity: 1; transform: scale(1); }
+        .btn-press:active { transform: scale(0.96); }
+        
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        
+        /* Custom Scrollbar for Content Area */
+        .content-scroll::-webkit-scrollbar { width: 6px; }
+        .content-scroll::-webkit-scrollbar-track { background: transparent; }
+        .content-scroll::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.1); border-radius: 20px; }
+        .content-scroll:hover::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.2); }
+    </style>
+</head>
+<!-- UPDATE: Gunakan h-screen dan overflow-hidden agar background fixed, scroll dilakukan di dalam card -->
+<body class="bg-tanira-cream text-tanira-dark h-screen w-full flex items-center justify-center p-4 relative overflow-hidden font-sans">
+
+    <!-- DECORATIVE BACKGROUND (Fixed) -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute -top-20 -right-20 w-96 h-96 bg-tanira-green/10 rounded-full blur-3xl animate-float"></div>
+        <div class="absolute -bottom-32 -left-20 w-[500px] h-[500px] bg-tanira-accent/5 rounded-full blur-3xl" style="animation: float 8s ease-in-out infinite reverse;"></div>
+    </div>
+
+    <!-- MAIN CONTAINER (Scrollable Internal) -->
+    <!-- UPDATE: max-h-[90vh] dan flex-col agar header tetap, konten scroll -->
+    <main class="relative z-10 w-full max-w-4xl bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 overflow-hidden max-h-[95vh] flex flex-col">
+        
+        <!-- PROGRESS HEADER (Fixed at top of card) -->
+        <div class="px-6 md:px-8 pt-6 md:pt-8 pb-4 shrink-0 bg-white/50 backdrop-blur-md z-20">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-2">
+                    <img src="/logo/logo.png" 
+                         onerror="this.src='https://placehold.co/40x40/2f7d32/ffffff?text=T'"
+                         alt="Logo TANIRA" 
+                         class="w-10 h-10 rounded-lg object-contain p-1">   
+                    <span class="font-bold text-lg tracking-tight text-tanira-green">TANIRA</span>
+                </div>
+                <div class="text-sm font-medium text-tanira-gray">
+                    Langkah <span id="step-number" class="text-tanira-dark font-bold transition-all duration-300">1</span> dari 2
+                </div>
+            </div>
+            <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-full bg-tanira-green rounded-full transition-all duration-700 ease-out w-1/2"></div>
+            </div>
+        </div>
+
+        <!-- CONTENT AREA (Scrollable) -->
+        <!-- UPDATE: overflow-y-auto agar bisa di-scroll pada layar kecil -->
+        <div class="flex-1 relative px-6 md:px-8 pb-8 pt-2 overflow-y-auto content-scroll">
+            
+            <!-- STEP 1: PILIH PERAN -->
+            <!-- UPDATE: min-h-full dan justify-start pada mobile agar tidak terpotong di atas -->
+            <div id="step-1" class="min-h-full flex flex-col justify-start md:justify-center transition-all duration-500 py-4">
+                <div class="text-center mb-8 md:mb-10 animate-fade-in-up">
+                    <h1 class="text-2xl md:text-4xl font-bold mb-3 text-tanira-dark">Halo, <%= user.name %>!</h1>
+                    <p class="text-tanira-gray text-base md:text-lg">Pilih peran agar kami bisa menyesuaikan pengalaman Anda.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+                    <!-- Value: 'petani' -->
+                    <div class="role-card cursor-pointer bg-white border border-gray-200 rounded-2xl p-5 md:p-6 relative group animate-fade-in-up delay-100" onclick="selectRole(this, 'petani')">
+                        <div class="absolute top-4 right-4 check-icon opacity-0 transition-all duration-300 transform scale-50">
+                            <i class="fa-solid fa-circle-check text-2xl text-tanira-green"></i>
+                        </div>
+                        <div class="icon-container w-14 h-14 md:w-16 md:h-16 bg-green-50 text-tanira-green rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-4 md:mb-6 transition-all duration-300">
+                            <i class="fa-solid fa-hat-cowboy"></i>
+                        </div>
+                        <h3 class="text-lg md:text-xl font-bold mb-2 group-hover:text-tanira-green transition-colors">Petani</h3>
+                        <p class="text-sm text-gray-500 leading-relaxed">Saya ingin mendaftarkan lahan, menjual hasil panen, dan melihat prediksi pasar.</p>
+                    </div>
+
+                    <!-- Value: 'pembeli' -->
+                    <div class="role-card cursor-pointer bg-white border border-gray-200 rounded-2xl p-5 md:p-6 relative group animate-fade-in-up delay-200" onclick="selectRole(this, 'pembeli')">
+                        <div class="absolute top-4 right-4 check-icon opacity-0 transition-all duration-300 transform scale-50">
+                            <i class="fa-solid fa-circle-check text-2xl text-tanira-green"></i>
+                        </div>
+                        <div class="icon-container w-14 h-14 md:w-16 md:h-16 bg-orange-50 text-tanira-accent rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-4 md:mb-6 transition-all duration-300">
+                            <i class="fa-solid fa-basket-shopping"></i>
+                        </div>
+                        <h3 class="text-lg md:text-xl font-bold mb-2 group-hover:text-tanira-accent transition-colors">Pembeli</h3>
+                        <p class="text-sm text-gray-500 leading-relaxed">Saya mencari suplai hasil tani segar langsung dari tangan pertama.</p>
+                    </div>
+
+                    <!-- Value: 'penyedia' -->
+                    <div class="role-card cursor-pointer bg-white border border-gray-200 rounded-2xl p-5 md:p-6 relative group animate-fade-in-up delay-300" onclick="selectRole(this, 'penyedia')">
+                        <div class="absolute top-4 right-4 check-icon opacity-0 transition-all duration-300 transform scale-50">
+                            <i class="fa-solid fa-circle-check text-2xl text-tanira-green"></i>
+                        </div>
+                        <div class="icon-container w-14 h-14 md:w-16 md:h-16 bg-amber-50 text-tanira-brown rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-4 md:mb-6 transition-all duration-300">
+                            <i class="fa-solid fa-tractor"></i>
+                        </div>
+                        <h3 class="text-lg md:text-xl font-bold mb-2 group-hover:text-tanira-brown transition-colors">Mitra Alat</h3>
+                        <p class="text-sm text-gray-500 leading-relaxed">Saya menyewakan traktor, drone, atau menjual pupuk dan bibit.</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-center animate-fade-in-up delay-300 pb-4 md:pb-0">
+                    <button id="btn-next" onclick="goToStep2()" disabled class="btn-press w-full md:w-auto bg-tanira-green text-white px-10 py-4 rounded-xl font-bold text-lg shadow-lg shadow-tanira-green/30 opacity-50 cursor-not-allowed transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2">
+                        Lanjutkan <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: DATA -->
+            <div id="step-2" class="hidden min-h-full flex flex-col justify-center py-4">
+                <div class="max-w-xl mx-auto w-full">
+                    <div class="text-center mb-8 md:mb-10">
+                        <h1 class="text-2xl md:text-4xl font-bold mb-3 text-tanira-dark">Lengkapi Profil <span id="role-text" class="text-tanira-green capitalize">Anda</span></h1>
+                        <p class="text-tanira-gray text-base md:text-lg">Informasi ini membantu kami memberikan rekomendasi yang tepat.</p>
+                    </div>
+
+                    <form id="onboardingForm" onsubmit="finishOnboarding(event)" class="space-y-4 md:space-y-6">
+                        <div class="input-group relative">
+                            <input type="text" id="fullname" name="fullname" value="<%= user.name %>" class="block w-full px-5 py-4 text-tanira-dark bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-tanira-green/50 focus:border-tanira-green transition-all shadow-sm" placeholder="Nama Lengkap" required>
+                        </div>
+
+                        <div class="input-group relative">
+                            <input type="tel" id="phone" name="phone" class="block w-full px-5 py-4 text-tanira-dark bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-tanira-green/50 focus:border-tanira-green transition-all shadow-sm" placeholder="Nomor WhatsApp (Opsional)">
+                        </div>
+
+                        <div class="input-group relative">
+                            <div class="relative">
+                                <select id="province" name="province" class="block w-full px-5 py-4 text-tanira-dark bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-tanira-green/50 focus:border-tanira-green transition-all shadow-sm appearance-none cursor-pointer">
+                                    <option value="" disabled selected>Pilih Provinsi Utama</option>
+                                    <option>Jawa Barat</option>
+                                    <option>Jawa Tengah</option>
+                                    <option>Jawa Timur</option>
+                                    <option>Luar Jawa</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-tanira-green">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 pb-4">
+                            <button type="submit" id="btn-submit" class="btn-press w-full bg-tanira-green text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-tanira-green/30 transition-all duration-300 hover:bg-tanira-greenDark hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2 group">
+                                <span id="btn-text-default" class="group-hover:hidden">Masuk ke Dashboard</span>
+                                <span id="btn-text-hover" class="hidden group-hover:inline-block">Mulai Sekarang</span>
+                                <i id="btn-icon" class="fa-solid fa-rocket group-hover:animate-bounce"></i>
+                                <span id="btn-loading" class="hidden"><i class="fa-solid fa-circle-notch animate-spin"></i> Menyimpan...</span>
+                            </button>
+                            <button type="button" onclick="goToStep1()" class="w-full mt-4 text-sm text-gray-400 hover:text-tanira-gray transition">
+                                Kembali ke pilihan peran
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Success Overlay -->
+    <div id="success-overlay" class="fixed inset-0 z-50 bg-tanira-green flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500">
+        <div class="text-center text-white p-8">
+            <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center text-tanira-green text-5xl mb-6 mx-auto animate-bounce shadow-2xl">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h2 class="text-4xl font-bold mb-2">Selamat Datang!</h2>
+            <p class="text-green-100 text-lg">Menyiapkan dashboard Anda...</p>
+        </div>
+    </div>
+
+    <script>
+        let selectedRole = null;
+        
+        const btnNext = document.getElementById('btn-next');
+        const progressBar = document.getElementById('progress-bar');
+        const stepNumber = document.getElementById('step-number');
+        const step1Div = document.getElementById('step-1');
+        const step2Div = document.getElementById('step-2');
+        const roleText = document.getElementById('role-text');
+        const btnSubmit = document.getElementById('btn-submit');
+
+        function selectRole(element, role) {
+            document.querySelectorAll('.role-card').forEach(card => card.classList.remove('active'));
+            element.classList.add('active');
+            selectedRole = role;
+            
+            btnNext.disabled = false;
+            btnNext.classList.remove('opacity-50', 'cursor-not-allowed');
+            btnNext.classList.add('animate-pulse');
+            setTimeout(() => btnNext.classList.remove('animate-pulse'), 500);
+        }
+
+        function goToStep2() {
+            if (!selectedRole) return;
+            progressBar.style.width = '100%';
+            stepNumber.style.opacity = '0';
+            setTimeout(() => {
+                stepNumber.innerText = '2';
+                stepNumber.style.opacity = '1';
+            }, 300);
+
+            const displayRole = selectedRole === 'penyedia' ? 'Mitra Alat' : selectedRole;
+            roleText.innerText = displayRole;
+
+            step1Div.classList.add('animate-slide-out');
+            setTimeout(() => {
+                step1Div.classList.add('hidden');
+                step1Div.classList.remove('animate-slide-out');
+                step2Div.classList.remove('hidden');
+                step2Div.classList.add('animate-slide-in');
+            }, 400);
+        }
+
+        function goToStep1() {
+            progressBar.style.width = '50%';
+            stepNumber.innerText = '1';
+            step2Div.classList.remove('animate-slide-in');
+            step2Div.classList.add('animate-slide-out');
+            
+            setTimeout(() => {
+                step2Div.classList.add('hidden');
+                step2Div.classList.remove('animate-slide-out');
+                step1Div.classList.remove('hidden');
+                step1Div.classList.add('animate-slide-in');
+            }, 400);
+        }
+
+        async function finishOnboarding(e) {
+            e.preventDefault();
+            
+            btnSubmit.disabled = true;
+            document.getElementById('btn-text-default').classList.add('hidden');
+            document.getElementById('btn-text-hover').classList.add('hidden');
+            document.getElementById('btn-icon').classList.add('hidden');
+            document.getElementById('btn-loading').classList.remove('hidden');
+            document.getElementById('btn-loading').classList.add('inline-block');
+
+            const fullname = document.getElementById('fullname').value;
+            const phone = document.getElementById('phone').value;
+            const province = document.getElementById('province').value;
+
+            try {
+                const response = await fetch('/auth/onboarding', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        role: selectedRole,
+                        fullname: fullname,
+                        phone: phone,
+                        province: province 
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const overlay = document.getElementById('success-overlay');
+                    overlay.classList.remove('pointer-events-none');
+                    overlay.classList.add('opacity-100');
+                    
+                    setTimeout(() => {
+                        window.location.href = data.redirectUrl || '/dashboard';
+                    }, 2000);
+                } else {
+                    alert(data.message || 'Terjadi kesalahan');
+                    btnSubmit.disabled = false;
+                    resetBtnState();
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Gagal menghubungi server');
+                btnSubmit.disabled = false;
+                resetBtnState();
+            }
+        }
+
+        function resetBtnState() {
+            document.getElementById('btn-text-default').classList.remove('hidden');
+            document.getElementById('btn-icon').classList.remove('hidden');
+            document.getElementById('btn-loading').classList.add('hidden');
+            document.getElementById('btn-loading').classList.remove('inline-block');
+        }
+    </script>
+</body>
+</html>

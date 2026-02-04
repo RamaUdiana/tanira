@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32',
+                            greenLight: '#E8F5E9',
+                            greenDark: '#1B5E20',
+                            brown: '#6D4C41',
+                            cream: '#F9F7F2',
+                            dark: '#1F2937',
+                            gray: '#6B7280',
+                            accent: '#F59E0B',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-enter { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24 md:pb-10">
+
+    <!-- HEADER SEARCH -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4 shadow-sm">
+        <div class="max-w-5xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center gap-4 flex-1">
+                <a href="/dashboard" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-tanira-dark shrink-0">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                
+                <!-- Search Form -->
+                <form action="/market/tools" method="GET" class="relative w-full max-w-md">
+                    <input type="hidden" name="category" value="<%= activeCategory %>">
+                    <input type="text" name="search" value="<%= searchQuery %>" placeholder="Cari traktor, mesin semprot, dan lainnya..." class="w-full pl-10 pr-4 py-2.5 bg-gray-100 border-none rounded-full text-sm focus:ring-2 focus:ring-tanira-green focus:bg-white transition placeholder-gray-400">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400"></i>
+                </form>
+            </div>
+            
+            <!-- Link ke Riwayat -->
+            <a href="/market/tools/history" class="w-10 h-10 rounded-full bg-tanira-green text-white flex items-center justify-center shadow-lg shadow-tanira-green/30 shrink-0 hover:bg-tanira-greenDark transition" title="Riwayat Sewa">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+        <!-- CATEGORY FILTER (Scrollable) -->
+        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+            <% categories.forEach(cat => { %>
+                <a href="/market/tools?category=<%= encodeURIComponent(cat) %>&search=<%= encodeURIComponent(searchQuery) %>" 
+                   class="px-4 py-2 rounded-full text-xs font-bold shadow-sm whitespace-nowrap transition-all border <%= activeCategory === cat ? 'bg-tanira-green text-white border-tanira-green' : 'bg-white text-gray-500 border-gray-200 hover:border-tanira-green hover:text-tanira-green' %>">
+                   <%= cat %>
+                </a>
+            <% }) %>
+        </div>
+
+        <!-- TOOL LIST -->
+        <section id="tool-grid">
+            
+            <% if (tools.length > 0) { %>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <% tools.forEach((tool, index) => { %>
+                    <!-- Link ke Detail -->
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-transparent hover:shadow-md hover:border-gray-100 transition animate-enter relative group" style="animation-delay: <%= index * 100 %>ms">
+                        
+                        <!-- Image -->
+                        <div class="h-40 rounded-xl bg-gray-100 overflow-hidden relative mb-4">
+                            <img src="<%= tool.imageUrl || 'https://images.unsplash.com/photo-1590802778336-d760777e436f?q=80&w=300' %>" 
+                                 class="w-full h-full object-cover transform hover:scale-110 transition duration-700"
+                                 onerror="this.src='https://placehold.co/300x200?text=No+Image'">
+                            
+                            <!-- Badge Kategori -->
+                            <span class="absolute top-2 left-2 bg-white/90 backdrop-blur text-tanira-brown px-2 py-1 rounded text-[10px] font-bold uppercase shadow-sm">
+                                <%= tool.category %>
+                            </span>
+
+                            <!-- UPDATE: Badge Tipe Transaksi (Kanan Atas) -->
+                            <% if (tool.transactionType === 'jual') { %>
+                                <span class="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold uppercase shadow-sm">
+                                    DIJUAL
+                                </span>
+                            <% } else { %>
+                                <span class="absolute top-2 right-2 bg-amber-500 text-white px-2 py-1 rounded text-[10px] font-bold uppercase shadow-sm">
+                                    SEWA
+                                </span>
+                            <% } %>
+                        </div>
+
+                        <!-- Info -->
+                        <div>
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="font-bold text-tanira-dark line-clamp-1"><%= tool.toolName %></h3>
+                                <div class="flex items-center gap-1 text-[10px] text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded">
+                                    <i class="fa-solid fa-star text-orange-400"></i> 4.8
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-3 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-tanira-green"></i> <%= tool.location %>
+                            </p>
+                            
+                            <div class="flex items-center justify-between border-t border-gray-50 pt-3">
+                                <div>
+                                    <!-- UPDATE: Label Harga -->
+                                    <p class="text-[10px] text-gray-400 uppercase font-bold">
+                                        <%= tool.transactionType === 'jual' ? 'Harga Beli' : 'Harga Sewa' %>
+                                    </p>
+                                    <p class="text-sm font-bold text-tanira-brown">
+                                        <%= helpers.formatRupiah(tool.pricePerDay) %> 
+                                        <!-- Satuan -->
+                                        <span class="text-[10px] font-normal text-gray-400">
+                                            <%= tool.transactionType === 'jual' ? '' : '/hari' %>
+                                        </span>
+                                    </p>
+                                </div>
+                                
+                                <a href="/market/tools/<%= tool.id %>" class="w-8 h-8 rounded-full bg-tanira-brown text-white flex items-center justify-center hover:bg-[#5D4037] transition shadow-md shadow-tanira-brown/20">
+                                    <i class="fa-solid fa-plus"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <a href="/market/tools/<%= tool.id %>" class="absolute inset-0 z-10"></a>
+                    </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <!-- Empty State -->
+                <div id="empty-state" class="py-12 flex flex-col items-center justify-center text-center animate-enter">
+                    <div class="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-300 text-4xl">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-tanira-dark mb-2">Tidak Ditemukan</h2>
+                    <p class="text-sm text-gray-500 max-w-xs mx-auto">
+                        Maaf, alat yang Anda cari dengan kata kunci "<%= searchQuery %>" belum tersedia di kategori ini.
+                    </p>
+                    <a href="/market/tools" class="mt-6 px-6 py-2 bg-white border border-gray-200 text-tanira-dark font-bold rounded-full hover:bg-gray-50 transition text-sm">
+                        Reset Pencarian
+                    </a>
+                </div>
+            <% } %>
+
+        </section>
+
+    </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION (CONSISTENT) -->
+    <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 px-6 py-3 md:hidden z-50">
+        <div class="flex justify-between items-center">
+            <!-- Beranda -->
+            <a href="/dashboard" class="flex flex-col items-center gap-1 text-gray-400 group hover:text-tanira-green transition">
+                <div class="w-10 h-8 flex items-center justify-center transition-all group-hover:-translate-y-1">
+                    <i class="fa-solid fa-house text-lg"></i>
+                </div>
+                <span class="text-[10px] font-medium">Beranda</span>
+            </a>
+
+            <a href="/market/tools/history" class="flex flex-col items-center gap-1 text-gray-400 group hover:text-tanira-green transition" id="nav-mytools-mobile">
+                <div class="w-10 h-8 flex items-center justify-center transition-all group-hover:-translate-y-1">
+                    <i class="fa-solid fa-tractor text-lg"></i>
+                </div>
+                <span class="text-[10px] font-medium">Riwayat Alat</span>
+            </a>
+
+            <!-- Tanam (Center Big Button) -->
+            <a href="/smart-planting" class="flex flex-col items-center gap-1 text-gray-400 group -mt-6">
+                <div class="w-14 h-14 rounded-full bg-tanira-green shadow-lg shadow-tanira-green/40 flex items-center justify-center text-white transition-all transform group-active:scale-95 border-4 border-tanira-cream">
+                    <i class="fa-solid fa-plus text-xl"></i>
+                </div>
+                <span class="text-[10px] font-medium group-hover:text-tanira-green">Tanam</span>
+            </a>
+
+            <!-- Pasar (Active) -->
+            <a href="/market/my-preorders" class="flex flex-col items-center gap-1 text-gray-400 group hover:text-tanira-green transition">
+                <div class="w-10 h-8 flex items-center justify-center transition-all group-hover:-translate-y-1">
+                    <i class="fa-solid fa-store text-lg"></i>
+                </div>
+                <span class="text-[10px] font-medium">Pasar</span>
+            </a>
+            
+            <a href="/market/tools" class="flex flex-col items-center gap-1 text-tanira-green group">
+                <div class="w-10 h-8 rounded-full bg-green-50 flex items-center justify-center transition-all group-hover:-translate-y-1">
+                    <i class="fa-solid fa-toolbox text-lg"></i>
+                </div>
+                <span class="text-[10px] font-bold">Alat</span>
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32', greenLight: '#E8F5E9', greenDark: '#1B5E20',
+                            brown: '#6D4C41', cream: '#F9F7F2', dark: '#1F2937',
+                            gray: '#6B7280', accent: '#F59E0B', surface: '#FFFFFF',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-enter { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .delay-100 { animation-delay: 100ms; } .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; } .delay-400 { animation-delay: 400ms; }
+        .progress-bar-fill { transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1); width: 0; }
+    </style>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-28 md:pb-10">
+
+    <!-- NAVIGATION -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+        <div class="max-w-3xl mx-auto flex items-center gap-4">
+            <a href="/dashboard" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-tanira-dark">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-lg leading-none">Detail Panen</h1>
+                <p class="text-xs text-tanira-gray mt-0.5">Transparansi langsung dari lahan</p>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-3xl mx-auto px-4 md:px-6 py-6 space-y-6">
+
+        <!-- 1. HEADER PANEN (FOTO DINAMIS) -->
+        <section class="animate-enter">
+            <div class="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden shadow-soft group mb-6">
+                <!-- Gunakan listing.imageUrl jika ada, atau fallback ke meta.imageUrl (default/kategori) -->
+                <img src="<%= listing.imageUrl || meta.imageUrl %>" 
+                     alt="<%= listing.crop.name %>" 
+                     class="w-full h-full object-cover transition duration-700 group-hover:scale-105"
+                     onerror="this.src='https://placehold.co/600x400?text=Foto+Tanaman'">
+                
+                <div class="absolute top-4 left-4 bg-tanira-accent text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Pre-Order
+                </div>
+
+                <div class="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-location-dot text-tanira-accent"></i> 
+                    <%= listing.user.farmerProfile ? listing.user.farmerProfile.location : 'Lokasi Petani' %>
+                </div>
+            </div>
+
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-tanira-dark"><%= listing.crop.name %></h1>
+                <p class="text-tanira-gray mt-1 text-sm"><%= listing.description || 'Varietas lokal super, cocok untuk kebutuhan Anda.' %></p>
+            </div>
+        </section>
+
+        <!-- 2. INFORMASI HARGA -->
+        <section class="animate-enter delay-100 bg-white rounded-2xl p-5 shadow-soft border border-gray-50">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-scale-balanced text-tanira-brown"></i>
+                    <h3 class="font-bold text-tanira-dark text-sm uppercase tracking-wide">Informasi Harga</h3>
+                </div>
+                <span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-600 px-2 py-1 rounded-lg text-[10px] font-bold border border-blue-100">
+                    <i class="fa-solid fa-shield-halved"></i> Fair Price
+                </span>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 items-stretch">
+                <!-- Reference Price -->
+                <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 flex flex-col justify-center">
+                    <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Harga Referensi Wilayah</p>
+                    <p class="text-base font-bold text-gray-500 line-through decoration-gray-400/50">
+                        <%= helpers.formatRupiah(meta.marketPrice) %>
+                    </p>
+                    <p class="text-[10px] text-gray-400 mt-1 italic">Rata-rata pasar wilayah</p>
+                </div>
+
+                <!-- Agreed Price -->
+                <div class="p-3 bg-tanira-green/5 rounded-xl border border-tanira-green relative overflow-hidden flex flex-col justify-center">
+                    <div class="absolute top-0 right-0 bg-tanira-green text-white text-[8px] px-2 py-0.5 rounded-bl-lg font-bold">
+                        DISEPAKATI
+                    </div>
+                    <p class="text-[10px] text-tanira-green uppercase font-bold mb-1">Harga Pre-Order</p>
+                    <p class="text-xl font-bold text-tanira-dark">
+                        <%= helpers.formatRupiah(listing.price) %> <span class="text-xs font-normal text-gray-500">/kg</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-3 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-check-circle text-tanira-green text-xs"></i>
+                <p class="text-xs text-tanira-gray">Harga disepakati secara adil untuk kesejahteraan petani.</p>
+            </div>
+        </section>
+
+        <!-- 3. PROGRESS TANAM (DINAMIS) -->
+        <section class="animate-enter delay-200 bg-white rounded-2xl p-6 shadow-soft border border-gray-50">
+            <div class="flex items-center gap-2 mb-4">
+                <i class="fa-solid fa-list-check text-tanira-green"></i>
+                <h3 class="font-bold text-tanira-dark text-sm uppercase tracking-wide">Status Tanam Terkini</h3>
+            </div>
+
+            <div class="mb-2">
+                <div class="flex justify-between text-xs text-gray-400 mb-2 font-medium">
+                    <span>Tanam</span>
+                    <!-- Status Teks Dinamis -->
+                    <span class="text-tanira-green font-bold"><%= meta.progressStatus %></span>
+                    <span>Panen</span>
+                </div>
+                <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                    <!-- Progress Bar Dinamis -->
+                    <div id="progress-bar" 
+                         class="progress-bar-fill h-full bg-tanira-green rounded-full relative" 
+                         data-width="<%= meta.progressWidth %>%">
+                        <div class="absolute inset-0 bg-white/20 w-full h-full animate-pulse"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CATATAN PETANI TERBARU (DINAMIS) -->
+            <% if (listing.lastLogMessage) { %>
+                <div class="flex items-start gap-3 mt-4 bg-tanira-greenLight/50 p-4 rounded-xl border border-tanira-green/10">
+                    <div class="w-6 h-6 rounded-full bg-tanira-green text-white flex items-center justify-center shrink-0 mt-0.5 text-xs">
+                        <i class="fa-solid fa-pen-nib"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">
+                            Update: <%= listing.lastLogDate ? new Date(listing.lastLogDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : 'Baru saja' %>
+                        </p>
+                        <p class="text-xs text-tanira-dark italic leading-relaxed">
+                            "<%= listing.lastLogMessage %>"
+                        </p>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="flex items-start gap-2 mt-4 bg-gray-50 p-3 rounded-xl">
+                    <i class="fa-solid fa-circle-info text-gray-400 mt-0.5 text-xs"></i>
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        Belum ada catatan pembaruan dari petani. Tanaman sedang dalam proses pertumbuhan normal.
+                    </p>
+                </div>
+            <% } %>
+        </section>
+
+        <!-- 4. INFORMASI PETANI -->
+        <section class="animate-enter delay-300">
+            <div class="bg-white rounded-2xl p-5 shadow-soft border border-gray-50 flex items-center gap-4">
+                <div class="w-14 h-14 rounded-full bg-gray-200 overflow-hidden shrink-0 border-2 border-white shadow-sm flex items-center justify-center text-tanira-green bg-green-50 text-xl font-bold">
+                    <!-- Initials Avatar -->
+                    <%= listing.user.name.charAt(0) %>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-tanira-dark text-lg"><%= listing.user.name %></h3>
+                            <p class="text-xs text-tanira-gray flex items-center gap-1">
+                                <i class="fa-solid fa-star text-tanira-accent"></i> <%= meta.rating %> (<%= meta.reviewCount %> Transaksi)
+                            </p>
+                        </div>
+                        <a href="#" class="text-xs font-bold text-tanira-green border border-tanira-green/30 px-3 py-1.5 rounded-lg hover:bg-tanira-green hover:text-white transition">
+                            Lihat Profil
+                        </a>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2 line-clamp-1">
+                        "Petani berpengalaman di lahan subur <%= listing.user.farmerProfile ? listing.user.farmerProfile.location : 'daerah ini' %>."
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. RENCANA PANEN -->
+        <section class="animate-enter delay-400">
+            <h3 class="font-bold text-tanira-dark mb-4 px-1">Detail Rencana Panen</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+                    <p class="text-xs text-gray-400 font-bold uppercase mb-1">Estimasi Panen</p>
+                    <p class="text-base font-bold text-tanira-dark flex items-center gap-2">
+                        <i class="fa-regular fa-calendar text-tanira-brown"></i> <%= helpers.formatDate(listing.harvestDate) %>
+                    </p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+                    <p class="text-xs text-gray-400 font-bold uppercase mb-1">Kuota Tersedia</p>
+                    <p class="text-base font-bold text-tanira-dark flex items-center gap-2">
+                        <i class="fa-solid fa-box-open text-tanira-brown"></i> <%= listing.quantity %> Kg
+                    </p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+                    <p class="text-xs text-gray-400 font-bold uppercase mb-1">Min. Order</p>
+                    <p class="text-base font-bold text-tanira-dark flex items-center gap-2">
+                        <i class="fa-solid fa-weight-hanging text-tanira-brown"></i> <%= listing.minOrder %> Kg
+                    </p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+                    <p class="text-xs text-gray-400 font-bold uppercase mb-1">Status</p>
+                    <span class="inline-block px-2 py-0.5 text-xs font-bold rounded bg-green-100 text-tanira-green uppercase"><%= listing.status %></span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 7. STICKY CTA -->
+    <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 p-4 z-50 animate-enter delay-500">
+        <div class="max-w-3xl mx-auto flex items-center gap-4">
+            <div class="hidden md:block">
+                <p class="text-xs text-gray-400">Total Pembayaran Estimasi</p>
+                <!-- Estimasi Min Order * Harga -->
+                <p class="font-bold text-tanira-green text-lg"><%= helpers.formatRupiah(listing.price * listing.minOrder) %> <span class="text-xs text-gray-400 font-normal">(Min. <%= listing.minOrder %>kg)</span></p>
+            </div>
+            
+            <form action="/market/preorder-form/<%= listing.id %>" method="GET" class="flex-1">
+                <button type="submit" class="w-full bg-tanira-green hover:bg-tanira-greenDark text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-tanira-green/30 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 group">
+                    Pre-Order Panen Ini
+                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                </button>
+            </form>
+        </div>
+        <p class="text-center text-[10px] text-gray-400 mt-2">
+            <i class="fa-solid fa-shield-halved mr-1"></i>
+            Pesanan Anda membantu petani merencanakan panen dengan lebih baik.
+        </p>
+    </div>
+
+    <!-- JS Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Animate Progress Bar
+            setTimeout(() => {
+                const bar = document.getElementById('progress-bar');
+                if(bar) {
+                    const width = bar.getAttribute('data-width');
+                    bar.style.width = width + '%'; // Perlu ditambah '%' agar CSS valid
+                }
+            }, 300);
+        });
+    </script>
+</body>
+</html>

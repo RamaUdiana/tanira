@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32',
+                            brown: '#6D4C41',
+                            cream: '#F9F7F2',
+                            dark: '#1F2937',
+                            gray: '#6B7280',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24 md:pb-10">
+
+    <!-- NAV -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+        <div class="max-w-5xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="/producer" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-tanira-dark">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="font-bold text-lg leading-none">Daftar Alat Saya</h1>
+                    <p class="text-xs text-tanira-gray mt-0.5">Kelola inventaris Anda</p>
+                </div>
+            </div>
+            <a href="/producer/add-tool" class="hidden md:flex bg-tanira-brown hover:bg-[#5D4037] text-white px-4 py-2 rounded-xl text-sm font-bold items-center gap-2 transition shadow-lg">
+                <i class="fa-solid fa-plus"></i> Tambah Baru
+            </a>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+        <!-- LIST ALAT -->
+        <section id="tools-list" class="space-y-4">
+            
+            <% if (tools.length > 0) { %>
+                <% tools.forEach(tool => { %>
+                <!-- Tambahkan ID unik ke card untuk manipulasi DOM lebih mudah jika perlu -->
+                <div id="tool-card-<%= tool.id %>" class="tool-card bg-white rounded-2xl p-4 shadow-sm border border-transparent flex flex-col md:flex-row gap-4 hover:shadow-md transition">
+                    <!-- Thumbnail -->
+                    <div class="w-full md:w-32 h-40 md:h-32 rounded-xl bg-gray-100 overflow-hidden shrink-0 relative">
+                        <img id="img-<%= tool.id %>" 
+                             src="<%= tool.imageUrl || 'https://images.unsplash.com/photo-1590802778336-d760777e436f?q=80&w=200' %>" 
+                             class="w-full h-full object-cover <%= tool.availability ? '' : 'grayscale' %> transition duration-500"
+                             onerror="this.src='https://placehold.co/200x200?text=No+Image'">
+                        
+                        <div class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-0.5 rounded text-[10px] font-bold text-gray-600 uppercase">
+                            <%= tool.category %>
+                        </div>
+
+                        <!-- UPDATE: Badge Tipe Transaksi -->
+                        <div class="absolute bottom-2 left-2 px-2 py-0.5 rounded text-[9px] font-bold uppercase shadow-sm text-white <%= tool.transactionType === 'jual' ? 'bg-blue-600' : 'bg-amber-500' %>">
+                            <%= tool.transactionType === 'jual' ? 'Jual' : 'Sewa' %>
+                        </div>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-lg text-tanira-dark line-clamp-1"><%= tool.toolName %></h3>
+                                <span id="badge-<%= tool.id %>" class="<%= tool.availability ? 'bg-green-100 text-tanira-green' : 'bg-gray-100 text-gray-500' %> text-[10px] px-2 py-0.5 rounded-full font-bold transition-colors duration-300">
+                                    <%= tool.availability ? 'Aktif' : 'Non-Aktif' %>
+                                </span>
+                            </div>
+                            <p class="text-xs text-tanira-gray line-clamp-2 mt-1 mb-2"><%= tool.description || 'Tidak ada deskripsi' %></p>
+                            <p class="text-sm font-bold text-tanira-brown"><%= helpers.formatRupiah(tool.pricePerDay) %> <span class="text-xs font-normal text-gray-400">/hari</span></p>
+                        </div>
+
+                        <!-- Actions Row -->
+                        <div class="flex items-center justify-between pt-4 mt-2 border-t border-gray-50">
+                            <div class="flex items-center gap-2">
+                                <label class="flex items-center cursor-pointer relative">
+                                    <input type="checkbox" class="sr-only peer" <%= tool.availability ? 'checked' : '' %> onchange="toggleStatus(this, <%= tool.id %>)">
+                                    <div class="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:bg-tanira-green transition-colors duration-300"></div>
+                                    <div class="absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform duration-300 peer-checked:translate-x-full shadow-sm"></div>
+                                </label>
+                                <span id="text-<%= tool.id %>" class="text-xs font-medium text-gray-500 status-text transition-colors duration-300">
+                                    <%= tool.availability ? 'Tersedia' : 'Tidak Aktif' %>
+                                </span>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <!-- UPDATE: Ubah button menjadi link a href ke halaman edit -->
+                                <a href="/producer/edit-tool/<%= tool.id %>" class="px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-tanira-brown bg-gray-50 hover:bg-tanira-brown/5 rounded-lg transition inline-flex items-center">
+                                    <i class="fa-solid fa-pen mr-1"></i> Edit
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            <% } else { %>
+                <!-- Empty State -->
+                <div class="py-12 flex flex-col items-center justify-center text-center">
+                    <div class="w-40 h-40 bg-white rounded-full flex items-center justify-center shadow-soft mb-6">
+                        <i class="fa-solid fa-box-open text-6xl text-gray-200"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-tanira-dark mb-2">Inventaris Kosong</h2>
+                    <p class="text-tanira-gray max-w-xs mx-auto mb-8">
+                        Anda belum menambahkan alat atau produk apapun.
+                    </p>
+                    <a href="/producer/add-tool" class="bg-tanira-brown hover:bg-[#5D4037] text-white font-bold py-3.5 px-8 rounded-xl shadow-lg transition inline-flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Tambahkan Alat
+                    </a>
+                </div>
+            <% } %>
+
+        </section>
+
+    </main>
+
+    <!-- FAB (Mobile) -->
+    <a href="/producer/add-tool" class="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-tanira-brown text-white rounded-full shadow-lg flex items-center justify-center text-2xl z-40 transition transform active:scale-95">
+        <i class="fa-solid fa-plus"></i>
+    </a>
+
+    <script>
+        async function toggleStatus(checkbox, id) {
+            const isChecked = checkbox.checked;
+            
+            // Ambil elemen UI yang perlu diupdate
+            const badge = document.getElementById('badge-' + id);
+            const text = document.getElementById('text-' + id); 
+            const img = document.getElementById('img-' + id);   
+
+            // Optimistic UI Update
+            if (isChecked) {
+                badge.classList.remove('bg-gray-100', 'text-gray-500');
+                badge.classList.add('bg-green-100', 'text-tanira-green');
+                badge.innerText = "Aktif";
+                
+                text.innerText = "Tersedia";
+                text.classList.add('text-tanira-green');
+                
+                if(img) img.classList.remove('grayscale');
+            } else {
+                badge.classList.remove('bg-green-100', 'text-tanira-green');
+                badge.classList.add('bg-gray-100', 'text-gray-500');
+                badge.innerText = "Non-Aktif";
+                
+                text.innerText = "Tidak Aktif";
+                text.classList.remove('text-tanira-green');
+
+                if(img) img.classList.add('grayscale');
+            }
+
+            try {
+                await fetch('/producer/tool/toggle/' + id, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ availability: isChecked })
+                });
+                
+                console.log('Status updated successfully');
+
+            } catch (err) {
+                console.error(err);
+                alert('Gagal mengubah status. Periksa koneksi internet.');
+                
+                // Revert UI jika gagal
+                checkbox.checked = !isChecked;
+                if (!isChecked) { 
+                     badge.classList.add('bg-gray-100', 'text-gray-500');
+                     badge.classList.remove('bg-green-100', 'text-tanira-green');
+                     badge.innerText = "Non-Aktif";
+                     text.innerText = "Tidak Aktif";
+                     if(img) img.classList.add('grayscale');
+                } else { 
+                     badge.classList.add('bg-green-100', 'text-tanira-green');
+                     badge.classList.remove('bg-gray-100', 'text-gray-500');
+                     badge.innerText = "Aktif";
+                     text.innerText = "Tersedia";
+                     if(img) img.classList.remove('grayscale');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - TANIRA</title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/css/output.css">
+    <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="font-sans text-tanira-dark bg-tanira-cream antialiased selection:bg-tanira-green selection:text-white">
+
+    <div class="min-h-screen flex">
+        
+        <!-- Left Side: Image & Branding -->
+        <div class="hidden lg:flex w-1/2 bg-tanira-greenDark relative items-center justify-center overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1659269816057-49fbcc3dadac?q=80&w=687&auto=format&fit=crop" alt="Agriculture Field" class="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay">
+            
+            <div class="relative z-10 p-12 text-white max-w-lg">
+                <div class="flex items-center gap-3 mb-8">
+                    <!-- UBAH DISINI: Ganti Icon dengan Logo Foto -->
+                    <img src="/logo/logo.png" 
+                         alt="Logo TANIRA" 
+                         class="w-12 h-12 rounded-xl object-contain bg-white backdrop-blur-sm border border-white/20 p-1">
+                    
+                    <span class="text-2xl font-bold tracking-tight">TANIRA</span>
+                </div>    
+                
+                <h2 class="text-4xl font-bold leading-tight mb-6">"Pertanian masa depan dimulai dari genggamanmu."</h2>
+                <div class="flex gap-8 border-t border-white/20 pt-8">
+                    <div>
+                        <span class="block text-3xl font-bold text-tanira-accent">2.5K+</span>
+                        <span class="text-sm text-green-100">Petani Bergabung</span>
+                    </div>
+                    <div>
+                        <span class="block text-3xl font-bold text-tanira-accent">150+</span>
+                        <span class="text-sm text-green-100">Mitra Pembeli</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Login Form -->
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-tanira-cream relative">
+
+            <div class="w-full max-w-md">
+                <div class="lg:hidden flex justify-center mb-8">
+                    <div class="flex items-center gap-2">
+                        <!-- UBAH DISINI: Menambahkan Logo di tampilan Mobile -->
+                        <img src="/logo/logo.png" 
+                             alt="Logo TANIRA" 
+                             class="w-10 h-10 rounded-lg object-contain p-1">
+                        <span class="font-bold text-2xl tracking-tight text-tanira-green">TANIRA</span>
+                    </div>
+                </div>
+
+                <div class="text-center lg:text-left mb-8">
+                    <h2 class="text-3xl font-bold text-tanira-dark mb-2">Selamat Datang! 👋</h2>
+                    <p class="text-tanira-gray">Masuk untuk mengelola lahan dan transaksi Anda.</p>
+                </div>
+
+                <!-- ALERTS -->
+                <% if (error) { %>
+                <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-r flex items-center gap-3 animate-pulse" role="alert">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <p><%= error %></p>
+                </div>
+                <% } %>
+
+                <% if (success) { %>
+                <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-r flex items-center gap-3" role="alert">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <p><%= success %></p>
+                </div>
+                <% } %>
+
+                <!-- FORM -->
+                <form action="/auth/login" method="POST" class="space-y-5">
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-tanira-dark mb-2">Email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-tanira-gray/50">
+                                <i class="fa-regular fa-envelope"></i>
+                            </div>
+                            <input type="email" name="email" required placeholder="nama@email.com" class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-tanira-green focus:ring-2 focus:ring-tanira-green/20 transition-all text-sm text-tanira-dark font-medium shadow-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-bold text-tanira-dark">Password</label>
+                            <a href="/auth/forgot-password" class="text-xs font-bold text-tanira-green hover:underline">Lupa Password?</a>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-tanira-gray/50">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
+                            <input type="password" name="password" required id="passwordInput" placeholder="••••••••" class="w-full pl-11 pr-12 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-tanira-green focus:ring-2 focus:ring-tanira-green/20 transition-all text-sm text-tanira-dark font-medium shadow-sm">
+                            <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-tanira-gray/50 hover:text-tanira-gray transition-colors">
+                                <i class="fa-regular fa-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-tanira-green hover:bg-tanira-greenDark text-white font-bold py-3.5 rounded-xl shadow-lg shadow-tanira-green/30 transition-all transform hover:-translate-y-0.5 active:scale-95">
+                        Masuk Sekarang
+                    </button>
+
+                </form>
+
+                <div class="relative my-8">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-4 bg-tanira-cream text-tanira-gray">Atau masuk dengan</span>
+                    </div>
+                </div>
+
+                <!-- Social Login (Mockup) -->
+                <!-- <div class="grid grid-cols-4 gap-4">
+                    <button class="flex items-center justify-center gap-2 py-3 border border-gray-200 rounded-xl hover:bg-white transition-colors bg-white shadow-sm">
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+                        <span class="text-sm font-bold text-tanira-gray">Google</span>
+                    </button>
+                </div> -->
+
+                <p class="text-center text-sm text-tanira-gray mt-8">
+                    Belum punya akun? 
+                    <a href="/auth/register" class="font-bold text-tanira-green hover:underline">Daftar Gratis</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('passwordInput');
+            const eyeIcon = document.getElementById('eyeIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
+
+</body>
+</html>

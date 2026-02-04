@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - TANIRA</title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- DRIVER.JS CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32', greenLight: '#E8F5E9', greenDark: '#1B5E20',
+                            brown: '#6D4C41', cream: '#F9F7F2', dark: '#1F2937',
+                            gray: '#6B7280', accent: '#F59E0B', surface: '#FFFFFF',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)', 'glow': '0 0 15px rgba(47, 125, 50, 0.3)' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .animate-enter { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .pulse-cta { animation: pulse-soft 2s infinite; }
+        @keyframes pulse-soft { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(47, 125, 50, 0.4); } 50% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(47, 125, 50, 0); } }
+        
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-500 { animation-delay: 500ms; }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .interactive-card { transition: all 0.3s ease; }
+        .interactive-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+
+        /* --- FIX DRIVER JS STYLE --- */
+        .driver-active-element {
+            background-color: #ffffff !important; 
+            position: relative !important;
+            z-index: 100004 !important;
+            border-radius: 8px;
+        }
+
+        .driver-popover.driverjs-theme {
+            background-color: #ffffff;
+            color: #1F2937;
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            z-index: 100005 !important;
+        }
+        .driver-popover-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.25rem; color: #2F7D32; margin-bottom: 8px; }
+        .driver-popover-description { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.95rem; line-height: 1.6; color: #4B5563; margin-bottom: 15px; }
+        
+        .driver-popover-footer button {
+            border-radius: 10px; font-weight: 700; padding: 8px 16px; font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer; transition: all 0.2s;
+        }
+        .driver-popover-footer .driver-next-btn {
+            background-color: #2F7D32 !important; color: white !important; border: 1px solid #2F7D32 !important; text-shadow: none !important;
+        }
+        .driver-popover-footer .driver-next-btn:hover { background-color: #1B5E20 !important; }
+        .driver-popover-footer .driver-prev-btn {
+            background-color: white !important; color: #6B7280 !important; border: 1px solid #E5E7EB !important;
+        }
+        .driver-popover-close-btn { color: #9CA3AF !important; }
+
+        /* Dropdown Animation */
+        #notification-dropdown { transform-origin: top right; transition: all 0.2s ease-out; }
+        .dropdown-open { transform: scale(1); opacity: 1; pointer-events: auto; }
+        .dropdown-closed { transform: scale(0.95); opacity: 0; pointer-events: none; }
+
+        .driver-active #tour-add-manual {
+            background-color: #6b4a2b !important;
+            color: #ffffff !important;
+        }
+    </style>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24 md:pb-10">
+
+    <!-- DESKTOP NAVBAR -->
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 hidden md:block">
+        <div class="max-w-6xl mx-auto flex justify-between items-center relative">
+            <div class="flex items-center gap-2">
+                <img src="/logo/logo.png" 
+                         onerror="this.src='https://placehold.co/40x40/2f7d32/ffffff?text=T'"
+                         alt="Logo TANIRA" 
+                         class="w-10 h-10 rounded-lg object-contain p-1">
+                <span class="font-bold text-xl text-tanira-green">TANIRA</span>
+            </div>
+            <div class="flex gap-6 text-sm font-medium text-tanira-gray items-center">
+                <a href="/dashboard" class="text-tanira-green font-bold">Beranda</a>
+                <a href="/market/tools/history" class="hover:text-tanira-green transition" id="nav-mytools-desktop">Alat</a>
+                <a href="/smart-planting" class="hover:text-tanira-green transition" id="nav-smart-desktop">Smart Planting</a>
+                <a href="/market/my-preorders" class="hover:text-tanira-green transition" id="nav-market-desktop">Pasar</a>
+                <a href="/market/tools" class="hover:text-tanira-green transition" id="nav-tools-desktop">Alat Tani</a>
+                
+                <!-- NOTIFIKASI BUTTON (DESKTOP) -->
+                <div class="relative">
+                    <button id="notif-btn-desktop" onclick="toggleNotif('desktop')" class="w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-tanira-green hover:border-tanira-green flex items-center justify-center transition relative">
+                        <i class="fa-regular fa-bell"></i>
+                        <% if(unreadCount > 0) { %>
+                            <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                        <% } %>
+                    </button>
+
+                    <!-- DROPDOWN NOTIFIKASI (DESKTOP) -->
+                    <div id="notif-dropdown-desktop" class="absolute top-12 right-0 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 dropdown-closed">
+                        <div class="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
+                            <h3 class="font-bold text-tanira-dark text-sm">Notifikasi</h3>
+                            <button class="text-[10px] text-tanira-green font-bold hover:underline">Tandai dibaca</button>
+                        </div>
+                        <div class="max-h-80 overflow-y-auto">
+                            <% if (notifications.length > 0) { %>
+                                <% notifications.forEach(notif => { %>
+                                    <div class="p-4 border-b border-gray-50 hover:bg-gray-50 transition cursor-pointer flex gap-3 <%= notif.read ? 'opacity-60' : '' %>">
+                                        <div class="w-10 h-10 rounded-full <%= notif.color %> flex items-center justify-center shrink-0">
+                                            <i class="fa-solid <%= notif.icon %>"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="text-sm font-bold text-tanira-dark leading-tight"><%= notif.title %></h4>
+                                            <p class="text-xs text-gray-500 mt-0.5 leading-snug"><%= notif.message %></p>
+                                            <p class="text-[10px] text-gray-400 mt-2 flex items-center gap-1">
+                                                <i class="fa-regular fa-clock"></i> <%= notif.time %>
+                                            </p>
+                                        </div>
+                                        <% if(!notif.read) { %>
+                                            <div class="w-2 h-2 rounded-full bg-red-500 mt-1.5 shrink-0"></div>
+                                        <% } %>
+                                    </div>
+                                <% }) %>
+                            <% } else { %>
+                                <div class="p-8 text-center text-gray-400 text-xs">Belum ada notifikasi</div>
+                            <% } %>
+                        </div>
+                        <div class="p-2 text-center border-t border-gray-50 bg-gray-50 rounded-b-2xl">
+                            <a href="#" class="text-[10px] font-bold text-tanira-green hover:text-tanira-greenDark">Lihat Semua</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile -->
+                <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-tanira-dark"><%= user.name %></p>
+                        <p class="text-[10px] text-tanira-gray capitalize"><%= user.role %></p>
+                    </div>
+                    <div class="w-8 h-8 bg-tanira-green text-white rounded-full flex items-center justify-center text-xs font-bold">
+                        <%= user.name.charAt(0) %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MOBILE HEADER -->
+    <div class="md:hidden sticky top-0 z-40 bg-tanira-cream/95 backdrop-blur-sm px-4 py-4 flex justify-between items-center border-b border-gray-100/50">
+        <div class="flex items-center gap-2">
+            <img src="/logo/logo.png" 
+                         onerror="this.src='https://placehold.co/40x40/2f7d32/ffffff?text=T'"
+                         alt="Logo TANIRA" 
+                         class="w-10 h-10 rounded-lg object-contain p-1">
+            <span class="font-bold text-lg text-tanira-green">TANIRA</span>
+        </div>
+        
+        <div class="flex items-center gap-3 relative">
+            <!-- NOTIFIKASI BUTTON (MOBILE) -->
+            <button id="notif-btn-mobile" onclick="toggleNotif('mobile')" class="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-tanira-gray relative active:scale-95 transition">
+                <i class="fa-regular fa-bell"></i>
+                <% if(unreadCount > 0) { %>
+                    <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                <% } %>
+            </button>
+            
+            <!-- DROPDOWN NOTIFIKASI (MOBILE) -->
+            <div id="notif-dropdown-mobile" class="absolute top-12 right-0 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 dropdown-closed origin-top-right">
+                 <!-- Isi sama dengan desktop, di-render ulang agar responsive logic mudah -->
+                 <div class="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
+                    <h3 class="font-bold text-tanira-dark text-sm">Notifikasi</h3>
+                    <button class="text-[10px] text-tanira-green font-bold">Baca semua</button>
+                </div>
+                <div class="max-h-64 overflow-y-auto">
+                    <% if (notifications.length > 0) { %>
+                        <% notifications.forEach(notif => { %>
+                            <div class="p-3 border-b border-gray-50 hover:bg-gray-50 transition flex gap-3 <%= notif.read ? 'opacity-60' : '' %>">
+                                <div class="w-8 h-8 rounded-full <%= notif.color %> flex items-center justify-center shrink-0 text-xs">
+                                    <i class="fa-solid <%= notif.icon %>"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-xs font-bold text-tanira-dark"><%= notif.title %></h4>
+                                    <p class="text-[10px] text-gray-500 mt-0.5 line-clamp-2"><%= notif.message %></p>
+                                    <p class="text-[9px] text-gray-400 mt-1"><%= notif.time %></p>
+                                </div>
+                                <% if(!notif.read) { %>
+                                    <div class="w-1.5 h-1.5 rounded-full bg-red-500 mt-1 shrink-0"></div>
+                                <% } %>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="p-6 text-center text-gray-400 text-xs">Kosong</div>
+                    <% } %>
+                </div>
+            </div>
+
+            <a href="/auth/logout" class="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-red-500 active:scale-95 transition">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="max-w-6xl mx-auto px-4 md:px-6 py-6 space-y-8" onclick="closeAllDropdowns(event)">
+
+        <!-- 1. GREETING SECTION (ID for Tour) -->
+        <section class="animate-enter" id="tour-welcome">
+            <div class="bg-gradient-to-r from-tanira-greenDark to-tanira-green rounded-2xl p-6 md:p-8 text-white relative overflow-hidden shadow-lg">
+                <!-- Background Pattern -->
+                <div class="absolute right-0 top-0 h-full w-1/2 opacity-10">
+                    <i class="fa-solid fa-wheat-awn text-[150px] absolute -right-4 -bottom-4"></i>
+                </div>
+                
+                <div class="relative z-10">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-green-100 text-sm font-medium mb-1"><%= currentDate %></p>
+                            <h1 class="text-2xl md:text-3xl font-bold mb-2">Selamat datang, <%= user.name %> 🌱</h1>
+                            <p class="text-green-50 text-sm md:text-base max-w-md">Kondisi tanah di lahan Anda terpantau optimal. Siap merencanakan tanam hari ini?</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex flex-wrap gap-3">
+                        <div class="bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs md:text-sm">
+                            <i class="fa-solid fa-location-dot text-tanira-accent"></i>
+                            <span><%= user.province || (farmer ? farmer.location : 'Lokasi Belum Diatur') %></span>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs md:text-sm">
+                            <i class="fa-solid fa-expand text-tanira-accent"></i>
+                            <span><%= farmer && farmer.landArea ? farmer.landArea : 0 %> Hektar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. QUICK INSIGHTS (ID for Tour) -->
+        <section id="tour-insights">
+            <div class="flex items-center justify-between mb-4 animate-enter delay-100">
+                <h2 class="font-bold text-lg text-tanira-dark">Kilas Wawasan</h2>
+                <span class="text-xs text-tanira-gray">Update: Realtime</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <% insights.forEach((item, index) => { %>
+                <div class="bg-white p-5 rounded-2xl shadow-soft interactive-card animate-enter" style="animation-delay: <%= (index + 2) * 100 %>ms">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-10 h-10 rounded-full bg-<%= item.color %>-50 flex items-center justify-center text-<%= item.color %>-500 text-lg">
+                            <i class="fa-solid <%= item.icon %>"></i>
+                        </div>
+                        <span class="bg-<%= item.color %>-100 text-<%= item.color %>-700 text-[10px] font-bold px-2 py-1 rounded-full"><%= item.tag %></span>
+                    </div>
+                    <p class="text-xs text-tanira-gray uppercase tracking-wider font-semibold"><%= item.title %></p>
+                    <h3 class="text-xl font-bold text-tanira-dark mt-1"><%= item.value %></h3>
+                    <p class="text-xs text-tanira-gray mt-2"><%= item.desc %></p>
+                </div>
+                <% }) %>
+            </div>
+        </section>
+
+        <!-- 3. CTA UTAMA: SMART PLANTING (ID for Tour) -->
+        <section class="animate-enter delay-500" id="tour-smart-planting">
+            <div class="bg-white rounded-2xl shadow-soft border-l-4 border-tanira-accent p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden group">
+                <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-tanira-accent/20 rounded-full blur-2xl group-hover:bg-tanira-accent/30 transition duration-500"></div>
+
+                <div class="flex-1 text-center md:text-left z-10">
+                    <h2 class="text-2xl font-bold text-tanira-dark mb-2">Rencanakan Tanam dengan Smart Planting</h2>
+                    <p class="text-tanira-gray mb-6 md:mb-0 max-w-lg">Dapatkan rekomendasi komoditas terbaik berdasarkan analisa tanah AI dan prediksi harga pasar 3 bulan ke depan.</p>
+                </div>
+
+                <div class="z-10 w-full md:w-auto">
+                    <a href="/smart-planting" class="pulse-cta w-full md:w-auto bg-tanira-green hover:bg-tanira-greenDark text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-tanira-green/30 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        Mulai Smart Planting
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. RENCANA TANAM AKTIF (ID for Tour) -->
+        <section class="animate-enter delay-500" id="tour-plans">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+                <div class="flex flex-wrap items-center gap-3">
+                    <h2 class="font-bold text-lg text-tanira-dark">Rencana Tanam Aktif</h2>
+                    
+                    <!-- ID for Tour -->
+                    <a href="/market/add-harvest" id="tour-add-manual" class="text-xs bg-tanira-brown text-white px-3 py-1.5 rounded-lg font-bold hover:bg-[#5D4037] transition shadow-md flex items-center gap-1.5 transform hover:-translate-y-0.5" title="Jual panen di luar rencana Smart Planting">
+                        <i class="fa-solid fa-plus text-[10px]"></i> Jual Panen Manual
+                    </a>
+                </div>
+                
+                <a href="/market/my-preorders" class="text-sm text-tanira-green font-semibold hover:underline flex items-center gap-1">
+                    Lihat Pre-Order Saya <i class="fa-solid fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+
+            <% if (plans.length > 0) { %>
+                <div class="space-y-4">
+                    <% plans.forEach(plan => { %>
+                    <div class="bg-white rounded-2xl shadow-soft p-5 border border-gray-100 flex flex-col sm:flex-row items-center gap-4 hover:shadow-md transition">
+                        
+                        <!-- UPDATE: Gambar Produk (Bukan Icon) -->
+                        <div class="flex items-center gap-4 w-full sm:w-auto flex-1">
+                            <div class="w-16 h-16 rounded-xl bg-gray-100 overflow-hidden shrink-0 border border-gray-200 relative group">
+                                <img src="<%= plan.crop.imageUrl || 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?q=80&w=200&auto=format&fit=crop' %>" 
+                                     alt="<%= plan.crop.name %>" 
+                                     class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                                     onerror="this.src='https://placehold.co/200?text=Produk'">
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="font-bold text-tanira-dark"><%= plan.crop.name %></h3>
+                                    <span class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded-lg">Aktif</span>
+                                </div>
+                                <div class="flex items-center gap-4 mt-1">
+                                    <p class="text-xs text-tanira-gray">
+                                        <i class="fa-regular fa-calendar mr-1"></i> 
+                                        Panen: <%= new Date(plan.estimatedHarvest).toLocaleDateString('id-ID', {month:'short', year:'numeric'}) %>
+                                    </p>
+                                    <p class="text-xs text-tanira-gray hidden sm:block">
+                                        <i class="fa-solid fa-chart-line mr-1 text-tanira-green"></i> 
+                                        Potensi: <%= helpers.formatRupiah(plan.expectedProfit) %>
+                                    </p>
+                                </div>
+                                <div class="w-full h-1.5 bg-gray-100 rounded-full mt-3 overflow-hidden">
+                                    <div class="h-full bg-blue-500 w-[40%] rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="w-full sm:w-auto flex justify-end">
+                            <a href="/market/add-harvest/<%= plan.id %>" class="text-xs font-bold bg-tanira-green text-white px-4 py-2 rounded-lg hover:bg-tanira-greenDark transition flex items-center gap-2 shadow-lg shadow-tanira-green/20 w-full sm:w-auto justify-center">
+                                <i class="fa-solid fa-bullhorn"></i> Jual / Pre-Order
+                            </a>
+                        </div>
+
+                    </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <div class="bg-white/50 border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center">
+                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 mx-auto mb-3">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <p class="text-tanira-gray font-medium">Belum ada rencana tanam aktif.</p>
+                    
+                    <div class="mt-4 flex flex-col sm:flex-row justify-center gap-3">
+                        <a href="/smart-planting" class="text-xs text-white bg-tanira-green font-bold px-4 py-2.5 rounded-lg hover:bg-tanira-greenDark transition shadow-md">
+                            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Buat Rencana (Smart)
+                        </a>
+                        <a href="/market/add-harvest" class="text-xs text-tanira-brown bg-white border border-tanira-brown font-bold px-4 py-2.5 rounded-lg hover:bg-tanira-brown hover:text-white transition shadow-sm">
+                            <i class="fa-solid fa-plus mr-1"></i> Jual Manual
+                        </a>
+                    </div>
+                </div>
+            <% } %>
+        </section>
+
+    </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 px-6 py-3 md:hidden z-50">
+        <div class="flex justify-between items-center">
+            <!-- 1. Beranda -->
+            <a href="/dashboard" class="flex flex-col items-center gap-1 text-tanira-green group">
+                <div class="w-10 h-8 rounded-full bg-green-50 flex items-center justify-center transition-all group-hover:-translate-y-1">
+                    <i class="fa-solid fa-house text-lg"></i>
+                </div>
+                <span class="text-[10px] font-bold">Beranda</span>
+            </a>
+
+            <a href="/market/tools/history" class="flex flex-col items-center gap-1 text-gray-400 group hover:text-tanira-green transition" id="nav-mytools-mobile">
+                <div class="w-10 h-8 flex items-center justify-center transition-all group-hover:-translate-y-1">
+                    <i class="fa-solid fa-tractor text-lg"></i>
+                </div>
+                <span class="text-[10px] font-medium">Riwayat Saya</span>
+            </a>
+
+            <!-- 2. Smart Planting -->
+            <a href="/smart-planting" class="flex flex-col items-center gap-1 text-gray-400 group -mt-6" id="nav-smart-mobile">
+                <div class="w-14 h-14 rounded-full bg-tanira-green shadow-lg shadow-tanira-green/40 flex items-center justify-center text-white transition-all transform group-active:scale-95 border-4 border-tanira-cream">
+                    <i class="fa-solid fa-plus text-xl"></i>
+                </div>
+                <span class="text-[10px] font-medium group-hover:text-tanira-green">Tanam</span>
+            </a>
+
+            <!-- 3. Pasar -->
+            <a href="/market/my-preorders" class="flex flex-col items-center gap-1 text-gray-400 group hover:text-tanira-green transition" id="nav-market-mobile">
+                <div class="w-10 h-8 flex items-center justify-center transition-all group-hover:-translate-y-1">
+                    <i class="fa-solid fa-store text-lg"></i>
+                </div>
+                <span class="text-[10px] font-medium">Pasar</span>
+            </a>
+            
+            <!-- 4. TOOLS -->
+            <a href="/market/tools" class="flex flex-col items-center gap-1 text-gray-400 group hover:text-tanira-green transition" id="nav-tools-mobile">
+                <div class="w-10 h-8 flex items-center justify-center transition-all group-hover:-translate-y-1">
+                    <i class="fa-solid fa-toolbox text-lg"></i>
+                </div>
+                <span class="text-[10px] font-medium">Alat</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- DRIVER.JS & TOUR SCRIPT -->
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Dashboard Loaded. Animations started.');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('tutorial') === 'true') {
+                startTutorial();
+            }
+        });
+
+        // Toggle Notification Function
+        function toggleNotif(type) {
+            const dropdown = document.getElementById(type === 'desktop' ? 'notif-dropdown-desktop' : 'notif-dropdown-mobile');
+            if (dropdown.classList.contains('dropdown-closed')) {
+                // Close others first (optional)
+                // Open this
+                dropdown.classList.remove('dropdown-closed');
+                dropdown.classList.add('dropdown-open');
+            } else {
+                dropdown.classList.add('dropdown-closed');
+                dropdown.classList.remove('dropdown-open');
+            }
+        }
+
+        function closeAllDropdowns(e) {
+            // Logic to close dropdown if clicked outside
+            const dtBtn = document.getElementById('notif-btn-desktop');
+            const mbBtn = document.getElementById('notif-btn-mobile');
+            const dtDrop = document.getElementById('notif-dropdown-desktop');
+            const mbDrop = document.getElementById('notif-dropdown-mobile');
+
+            if (dtBtn && dtDrop && !dtBtn.contains(e.target) && !dtDrop.contains(e.target)) {
+                dtDrop.classList.add('dropdown-closed');
+                dtDrop.classList.remove('dropdown-open');
+            }
+            if (mbBtn && mbDrop && !mbBtn.contains(e.target) && !mbDrop.contains(e.target)) {
+                mbDrop.classList.add('dropdown-closed');
+                mbDrop.classList.remove('dropdown-open');
+            }
+        }
+
+        function startTutorial() {
+            const driver = window.driver.js.driver;
+            
+            const driverObj = driver({
+                showProgress: true,
+                animate: true,
+                doneBtnText: 'Selesai',
+                closeBtnText: 'Lewati',
+                nextBtnText: 'Lanjut',
+                prevBtnText: 'Kembali',
+                popoverClass: 'driverjs-theme',
+                stageBackground: '#ffffff', 
+                opacity: 0.7, 
+                
+                steps: [
+                    { 
+                        element: '#tour-welcome', 
+                        popover: { 
+                            title: 'Halo, Petani Modern 🌱', 
+                            description: 'Selamat datang di dashboard Anda. Di sini Anda bisa memantau kondisi lahan dan cuaca hari ini secara ringkas.',
+                            side: "bottom", align: 'start'
+                        } 
+                    },
+                    { 
+                        element: '#tour-insights', 
+                        popover: { 
+                            title: 'Wawasan Pasar', 
+                            description: 'Pantau harga pasar dan informasi cuaca terkini untuk membantu pengambilan keputusan tanam.',
+                            side: "top", align: 'start'
+                        } 
+                    },
+                    { 
+                        element: '#tour-smart-planting', 
+                        popover: { 
+                            title: 'Fitur Utama: Smart Planting', 
+                            description: 'Gunakan Smart Planting untuk melihat rekomendasi tanaman yang lebih aman berdasarkan kondisi lahan dan tren pasar.',
+                            side: "top", align: 'center'
+                        } 
+                    },
+                    { 
+                        element: '#tour-plans', 
+                        popover: { 
+                            title: 'Kelola & Jual', 
+                            description: 'Rencana tanam Anda akan muncul di sini. Anda bisa langsung membuka pre-order ke pembeli.',
+                            side: "top", align: 'start'
+                        } 
+                    },
+                    { 
+                        element: '#tour-add-manual', 
+                        popover: { 
+                            title: 'Jual Cepat', 
+                            description: 'Punya hasil panen di luar rencana? Klik di sini untuk menjualnya secara manual.',
+                            side: "left", align: 'center'
+                        } 
+                    },
+                    { 
+                        element: window.innerWidth < 768 ? '#nav-mytools-mobile' : '#nav-mytools-desktop', 
+                        popover: { 
+                            title: 'Riwayat Alat', 
+                            description: 'Lihat riwayat pembelian atau penyewaan alat pertanian Anda di sini.',
+                            side: "top", align: 'center'
+                        } 
+                    },
+                    { 
+                        element: window.innerWidth < 768 ? '#nav-market-mobile' : '#nav-market-desktop', 
+                        popover: { 
+                            title: 'Pasar Panen', 
+                            description: 'Lihat permintaan dari pembeli dan kelola pesanan panen Anda di menu Pasar.',
+                            side: "top", align: 'center'
+                        } 
+                    },
+                    { 
+                        element: window.innerWidth < 768 ? '#nav-tools-mobile' : '#nav-tools-desktop', 
+                        popover: { 
+                            title: 'Sewa Alat Tani', 
+                            description: 'Butuh traktor atau drone? Cari dan sewa alat dari penyedia terpercaya di menu Alat ini.',
+                            side: "top", align: 'center'
+                        } 
+                    }
+                ],
+                onDestroyStarted: () => {
+                    const url = new URL(window.location);
+                    url.searchParams.delete('tutorial');
+                    window.history.replaceState({}, '', url);
+                    driverObj.destroy();
+                }
+            });
+
+            setTimeout(() => {
+                driverObj.drive();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

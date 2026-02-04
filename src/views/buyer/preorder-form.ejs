@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32', greenLight: '#E8F5E9', greenDark: '#1B5E20',
+                            brown: '#6D4C41', cream: '#F9F7F2', dark: '#1F2937',
+                            gray: '#6B7280', accent: '#F59E0B',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24 md:pb-10">
+
+    <!-- NAV -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+        <div class="max-w-2xl mx-auto flex items-center gap-4">
+            <a href="/market/harvest/<%= listing.id %>" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-tanira-dark">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-lg leading-none">Konfirmasi Pesanan</h1>
+                <p class="text-xs text-tanira-gray mt-0.5"><%= listing.crop.name %></p>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-2xl mx-auto px-4 py-6 space-y-6">
+
+        <!-- 1. RINGKASAN PRODUK -->
+        <section class="bg-white rounded-2xl p-4 shadow-soft flex items-center gap-4 border border-gray-50">
+            <div class="w-16 h-16 rounded-xl bg-gray-100 overflow-hidden shrink-0">
+                <img src="<%= listing.imageUrl || 'https://placehold.co/200' %>" class="w-full h-full object-cover">
+            </div>
+            <div>
+                <h3 class="font-bold text-tanira-dark"><%= listing.crop.name %></h3>
+                <p class="text-xs text-tanira-gray mb-1">Oleh: <%= listing.user.name %></p>
+                <p class="text-sm font-bold text-tanira-green"><%= helpers.formatRupiah(listing.price) %> <span class="text-xs font-normal text-gray-400">/kg</span></p>
+            </div>
+        </section>
+
+        <!-- 2. FORM INPUT -->
+        <section class="bg-white rounded-2xl p-6 shadow-soft space-y-6">
+            <div>
+                <label class="block text-sm font-bold text-tanira-dark mb-4 text-center">Mau Pesan Berapa Banyak?</label>
+                
+                <div class="flex items-center justify-center gap-6">
+                    <button onclick="adjustQty(-10)" class="w-12 h-12 rounded-full bg-gray-100 text-tanira-dark hover:bg-gray-200 flex items-center justify-center transition font-bold text-xl">-</button>
+                    
+                    <div class="relative w-32">
+                        <input type="number" id="input-qty" value="<%= listing.minOrder %>" min="<%= listing.minOrder %>" class="w-full text-center text-3xl font-bold text-tanira-dark border-b-2 border-tanira-green/30 focus:border-tanira-green focus:outline-none pb-2 bg-transparent" oninput="updateTotal()">
+                        <span class="block text-center text-xs text-gray-400 mt-1 font-bold">Kg</span>
+                    </div>
+
+                    <button onclick="adjustQty(10)" class="w-12 h-12 rounded-full bg-tanira-green text-white hover:bg-tanira-greenDark flex items-center justify-center transition font-bold text-xl shadow-lg shadow-tanira-green/30">+</button>
+                </div>
+                
+                <p class="text-center text-xs text-orange-500 mt-4 font-medium bg-orange-50 py-2 rounded-lg border border-orange-100 inline-block w-full">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> Minimal pemesanan <%= listing.minOrder %> Kg
+                </p>
+            </div>
+
+            <div class="border-t border-gray-100 pt-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-gray-500">Subtotal</span>
+                    <span class="font-bold text-tanira-dark" id="subtotal">-</span>
+                </div>
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-sm text-gray-500">Biaya Layanan (1%)</span>
+                    <span class="font-bold text-tanira-dark" id="service-fee">-</span>
+                </div>
+                <div class="flex justify-between items-center pt-4 border-t border-dashed border-gray-200">
+                    <span class="text-lg font-bold text-tanira-dark">Total</span>
+                    <span class="text-2xl font-bold text-tanira-green" id="grand-total">-</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. TOMBOL CONFIRM -->
+        <button onclick="submitOrder()" id="btn-submit" class="w-full bg-tanira-brown hover:bg-[#5D4037] text-white font-bold py-4 rounded-xl shadow-lg transition-all transform hover:-translate-y-1">
+            Konfirmasi Pre-Order
+        </button>
+
+    </main>
+
+    <script>
+        const price = <%= listing.price %>;
+        const minOrder = <%= listing.minOrder %>;
+        const listingId = <%= listing.id %>;
+        
+        const inputQty = document.getElementById('input-qty');
+        const elSubtotal = document.getElementById('subtotal');
+        const elService = document.getElementById('service-fee');
+        const elTotal = document.getElementById('grand-total');
+        
+        const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num);
+
+        function updateTotal() {
+            let qty = parseInt(inputQty.value) || 0;
+            if (qty < minOrder) qty = minOrder;
+            
+            const sub = qty * price;
+            const fee = sub * 0.01;
+            const total = sub + fee;
+
+            elSubtotal.innerText = formatIDR(sub);
+            elService.innerText = formatIDR(fee);
+            elTotal.innerText = formatIDR(total);
+        }
+
+        function adjustQty(amount) {
+            let current = parseInt(inputQty.value) || 0;
+            let newVal = current + amount;
+            if (newVal < minOrder) newVal = minOrder;
+            inputQty.value = newVal;
+            updateTotal();
+        }
+
+        async function submitOrder() {
+            const btn = document.getElementById('btn-submit');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Memproses...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/market/preorder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ listingId, quantity: inputQty.value })
+                });
+                
+                const res = await response.json();
+                if(res.success) {
+                    window.location.href = res.redirectUrl;
+                } else {
+                    alert('Gagal: ' + res.message);
+                    btn.disabled = false;
+                    btn.innerHTML = 'Konfirmasi Pre-Order';
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Error koneksi');
+            }
+        }
+
+        updateTotal();
+    </script>
+</body>
+</html>

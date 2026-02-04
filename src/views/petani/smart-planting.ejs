@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <!-- Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons: FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32',
+                            greenLight: '#E8F5E9',
+                            greenDark: '#1B5E20',
+                            brown: '#6D4C41',
+                            cream: '#F9F7F2',
+                            dark: '#1F2937',
+                            gray: '#6B7280',
+                            accent: '#F59E0B',
+                            surface: '#FFFFFF',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* Animasi garis */
+        @keyframes drawLine {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        /* Animasi titik */
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-enter { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        
+        .line-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawLine 2s ease-out forwards;
+        }
+        
+        .chart-dot {
+            transform-origin: center;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0;
+        }
+
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        
+        .rec-card { transition: all 0.3s ease; }
+        .rec-card:hover { transform: translateY(-4px); box-shadow: 0 15px 30px -5px rgba(0,0,0,0.1); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24">
+
+    <!-- NAVIGATION -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+        <div class="max-w-4xl mx-auto flex items-center gap-4">
+            <a href="/dashboard" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-tanira-dark">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-lg leading-none">Smart Planting</h1>
+                <p class="text-xs text-tanira-gray mt-0.5">Rekomendasi & Analisa Pasar</p>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-4xl mx-auto px-4 py-8 space-y-8">
+
+        <!-- 1. HEADER CONTEXT -->
+        <section class="animate-enter text-center md:text-left">
+            <h2 class="text-2xl md:text-3xl font-bold text-tanira-dark mb-2">Rekomendasi Tanam Terbaik</h2>
+            <p class="text-tanira-gray max-w-xl">
+                Analisa lahan di <span class="font-bold text-tanira-green"><%= location %></span> menunjukkan potensi maksimal untuk komoditas berikut.
+            </p>
+            
+            <div class="flex flex-wrap gap-2 mt-4 justify-center md:justify-start">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-tanira-green border border-green-100">
+                    <i class="fa-solid fa-expand"></i> <%= landArea %> Hektar
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-600 border border-blue-100">
+                    <i class="fa-solid fa-cloud-sun-rain"></i> Awal Musim Hujan
+                </span>
+            </div>
+        </section>
+
+        <!-- 2. REKOMENDASI UTAMA (Hero Card) -->
+        <section class="animate-enter delay-100">
+            <div class="flex items-center gap-2 mb-4">
+                <i class="fa-solid fa-star text-tanira-accent animate-pulse"></i>
+                <h3 class="font-bold text-tanira-dark uppercase tracking-wider text-sm">Paling Direkomendasikan</h3>
+            </div>
+
+            <div class="rec-card bg-white rounded-2xl shadow-card overflow-hidden border-2 border-tanira-green relative cursor-pointer group">
+                <div class="absolute top-0 right-0 bg-tanira-green text-white text-xs font-bold px-4 py-2 rounded-bl-2xl z-10">
+                    Skor Kecocokan <%= rec.score %>%
+                </div>
+
+                <div class="flex flex-col md:flex-row">
+                    <div class="md:w-2/5 h-48 md:h-auto relative overflow-hidden">
+                        <img src="<%= rec.image %>" 
+                             alt="<%= rec.name %>" 
+                             class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent md:hidden"></div>
+                        <div class="absolute bottom-4 left-4 text-white md:hidden">
+                            <h3 class="text-2xl font-bold"><%= rec.name %></h3>
+                        </div>
+                    </div>
+
+                    <div class="p-6 md:p-8 md:w-3/5 flex flex-col justify-between">
+                        <div>
+                            <h3 class="hidden md:block text-2xl md:text-3xl font-bold text-tanira-dark mb-2"><%= rec.name %></h3>
+                            <p class="text-sm text-tanira-gray mb-6 leading-relaxed">
+                                <%= rec.description %>
+                                <% if(rec.trendStatus === 'naik') { %>
+                                    <span class="text-green-600 font-bold ml-1"><%= rec.trend %></span>
+                                <% } %>
+                            </p>
+
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="bg-tanira-cream rounded-xl p-3 border border-tanira-green/10">
+                                    <p class="text-xs text-tanira-gray mb-1">Est. Panen</p>
+                                    <p class="font-bold text-tanira-dark"><%= rec.duration %></p>
+                                </div>
+                                <div class="bg-tanira-cream rounded-xl p-3 border border-tanira-green/10">
+                                    <p class="text-xs text-tanira-gray mb-1">Potensi Hasil</p>
+                                    <p class="font-bold text-tanira-green"><%= rec.yield %></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. GRAFIK TREN HARGA (LINE CHART - UPDATED) -->
+        <section class="animate-enter delay-200">
+            <div class="bg-white rounded-2xl shadow-card p-6 border border-gray-100">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h3 class="font-bold text-tanira-dark text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-tanira-green"></i>
+                            Tren Harga Pasar
+                        </h3>
+                        <p class="text-xs text-tanira-gray mt-1">Data rata-rata pengepul di <span class="font-bold text-tanira-dark"><%= location %></span></p>
+                    </div>
+                    <% 
+                       // Ambil harga terakhir dari array chart
+                       const currentPrice = chart[chart.length - 1]; 
+                    %>
+                    <div class="text-right">
+                        <p class="text-xs text-gray-400 font-bold uppercase">Harga Saat Ini</p>
+                        <p class="text-2xl font-bold text-tanira-green"><%= helpers.formatRupiah(currentPrice.price) %><span class="text-sm text-gray-400 font-normal">/kg</span></p>
+                        <div class="inline-flex items-center gap-1 bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs font-bold mt-1">
+                            <i class="fa-solid fa-arrow-trend-up"></i> Stabil
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SVG Line Chart Container -->
+                <div class="relative h-48 w-full border-b border-l border-gray-100">
+                    <!-- Grid Lines Background -->
+                    <div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20 pr-4">
+                        <div class="w-full h-px bg-gray-300 border-t border-dashed"></div>
+                        <div class="w-full h-px bg-gray-300 border-t border-dashed"></div>
+                        <div class="w-full h-px bg-gray-300 border-t border-dashed"></div>
+                        <div class="w-full h-px bg-gray-300 border-t border-dashed"></div>
+                    </div>
+
+                    <% 
+                        // Perhitungan Koordinat SVG
+                        // chart data structure: [{label, price, height, isCurrent}, ...]
+                        const pointsCount = chart.length;
+                        // Margin agar grafik tidak mentok
+                        const xStep = 100 / (pointsCount - 1); 
+                        
+                        let pointsString = "";
+                        let areaPointsString = `0,100 `; // Start bottom-left for fill area
+
+                        chart.forEach((item, index) => {
+                            const x = index * xStep;
+                            const y = 100 - item.height; // SVG y=0 is top, so invert height
+                            pointsString += `${x},${y} `;
+                            areaPointsString += `${x},${y} `;
+                        });
+                        
+                        // Close area path
+                        areaPointsString += `100,100`; 
+                    %>
+
+                    <!-- SVG Chart -->
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full overflow-visible">
+                        
+                        <!-- Area Fill Gradient -->
+                        <defs>
+                            <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+                                <stop offset="0%" stop-color="#2F7D32" stop-opacity="0.2"/>
+                                <stop offset="100%" stop-color="#2F7D32" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <polygon points="<%= areaPointsString %>" fill="url(#chartGradient)" />
+
+                        <!-- Line Path -->
+                        <polyline 
+                            points="<%= pointsString %>" 
+                            fill="none" 
+                            stroke="#2F7D32" 
+                            stroke-width="2" 
+                            stroke-linejoin="round" 
+                            stroke-linecap="round"
+                            class="line-path"
+                        />
+
+                        <!-- Dots & Labels -->
+                        <% chart.forEach((item, index) => { 
+                            const x = index * xStep;
+                            const y = 100 - item.height;
+                        %>
+                            <!-- Dot -->
+                            <circle cx="<%= x %>" cy="<%= y %>" r="2" fill="#fff" stroke="#2F7D32" stroke-width="1.5" class="chart-dot" style="animation-delay: <%= 1.5 + (index * 0.2) %>s" />
+                            
+                            <!-- Price Tooltip (Static or Hover) -->
+                            <g class="chart-dot" style="animation-delay: <%= 1.7 + (index * 0.2) %>s">
+                                <rect x="<%= x - 12 %>" y="<%= y - 12 %>" width="24" height="8" rx="2" fill="#1F2937" opacity="0.9" />
+                                <text x="<%= x %>" y="<%= y - 7 %>" font-size="3" fill="white" text-anchor="middle" font-weight="bold">
+                                    <%= (item.price / 1000).toFixed(0) %>k
+                                </text>
+                            </g>
+                        <% }) %>
+                    </svg>
+                </div>
+
+                <!-- X-Axis Labels -->
+                <div class="flex justify-between mt-2 text-[10px] text-gray-400 font-medium px-1">
+                    <% chart.forEach((item) => { %>
+                        <div class="text-center w-8"><%= item.label %></div>
+                    <% }) %>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. ALTERNATIF TANAMAN (Looping Dinamis) -->
+        <section class="animate-enter delay-300">
+            <h3 class="font-bold text-tanira-dark mb-4 px-1">Alternatif Lainnya</h3>
+            <div class="grid md:grid-cols-2 gap-4">
+                
+                <% alternatives.forEach(alt => { %>
+                <div class="rec-card bg-white p-4 rounded-2xl shadow-card border border-transparent hover:border-gray-200 flex gap-4 items-center cursor-pointer">
+                    <div class="w-16 h-16 rounded-xl overflow-hidden shrink-0">
+                        <img src="<%= alt.image %>" alt="<%= alt.name %>" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-bold text-tanira-dark"><%= alt.name %></h4>
+                            <span class="text-xs <%= alt.trendDown ? 'text-red-500' : 'text-tanira-gray' %>">
+                                <% if(alt.trendDown) { %><i class="fa-solid fa-arrow-trend-down"></i> <% } %>
+                                <%= alt.trend %>
+                            </span>
+                        </div>
+                        <div class="mt-1 flex items-center justify-between">
+                            <span class="text-sm font-bold text-tanira-green"><%= helpers.formatRupiah(alt.price) %> <span class="text-xs font-normal text-gray-400">/kg</span></span>
+                            <span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded text-gray-500">Risiko <%= alt.risk %></span>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+
+            </div>
+        </section>
+
+        <!-- 5. CTA SIMULASI -->
+        <section class="animate-enter delay-400 pt-4">
+            <div class="bg-tanira-dark text-white rounded-2xl p-8 text-center relative overflow-hidden">
+                <div class="relative z-10 max-w-lg mx-auto">
+                    <h2 class="text-xl font-bold mb-2">Sudah Yakin dengan <%= rec.name %>?</h2>
+                    <p class="text-gray-300 mb-6 text-sm">
+                        Lakukan simulasi biaya, jadwal, dan proyeksi hasil panen secara detail.
+                    </p>
+                    <a href="/smart-planting/simulation" class="inline-block w-full md:w-auto bg-tanira-green hover:bg-white hover:text-tanira-green text-white font-bold py-3.5 px-8 rounded-xl transition-all shadow-glow transform hover:-translate-y-1">
+                        <i class="fa-solid fa-calculator mr-2"></i> Mulai Simulasi Tanam
+                    </a>
+                </div>
+                <!-- Decorative Blobs -->
+                <div class="absolute top-0 left-0 w-32 h-32 bg-tanira-green opacity-20 rounded-full blur-2xl -translate-x-1/2 -translate-y-1/2"></div>
+                <div class="absolute bottom-0 right-0 w-40 h-40 bg-tanira-accent opacity-10 rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        console.log("Smart Planting Page Loaded Dynamically");
+    </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32', brown: '#6D4C41', cream: '#F9F7F2', dark: '#1F2937',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen flex items-center justify-center p-6">
+
+    <main class="w-full max-w-sm text-center">
+        
+        <div class="mb-8 flex justify-center">
+            <div class="w-24 h-24 bg-tanira-brown/10 rounded-full flex items-center justify-center text-tanira-brown text-5xl animate-bounce shadow-lg">
+                <i class="fa-solid fa-check"></i>
+            </div>
+        </div>
+
+        <h1 class="text-2xl font-bold text-tanira-dark mb-2">Permintaan Terkirim!</h1>
+        <p class="text-gray-500 mb-8 text-sm">
+            Permintaan sewa untuk <strong><%= booking.tool.toolName %></strong> telah dikirim ke penyedia.
+        </p>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm mb-8 text-left border border-gray-50">
+            <div class="flex justify-between mb-2 pb-2 border-b border-gray-100">
+                <span class="text-xs text-gray-400">Penyedia</span>
+                <span class="text-sm font-bold text-tanira-dark"><%= booking.tool.user.name %></span>
+            </div>
+            <div class="flex justify-between items-center mt-2">
+                <span class="text-xs text-gray-400">Kontak</span>
+                <a href="https://wa.me/<%= booking.tool.user.phone %>" target="_blank" class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded flex items-center gap-1 hover:bg-green-100">
+                    <i class="fa-brands fa-whatsapp"></i> Chat WhatsApp
+                </a>
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            <a href="/market/tools/history" class="block w-full bg-tanira-brown text-white font-bold py-3.5 rounded-xl hover:bg-[#5D4037] transition shadow-lg shadow-tanira-brown/30">
+                Lihat Riwayat Permintaan
+            </a>
+            <a href="/market/tools" class="block w-full py-3.5 text-gray-400 font-bold text-sm hover:text-tanira-dark transition">
+                Cari Alat Lainnya
+            </a>
+        </div>
+
+    </main>
+
+</body>
+</html>

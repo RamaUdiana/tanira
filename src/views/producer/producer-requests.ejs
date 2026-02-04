@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32',
+                            brown: '#6D4C41',
+                            cream: '#F9F7F2',
+                            dark: '#1F2937',
+                            gray: '#6B7280',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-enter { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .delay-100 { animation-delay: 100ms; }
+    </style>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24 md:pb-10">
+
+    <!-- NAV -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+        <div class="max-w-5xl mx-auto flex items-center gap-4">
+            <a href="/producer" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-tanira-dark">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-lg leading-none">Permintaan Masuk</h1>
+                <p class="text-xs text-tanira-gray mt-0.5">Kelola penyewaan alat</p>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+        <!-- FILTER TABS -->
+        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2" id="filter-section">
+            <button onclick="filterRequests('all', this)" class="filter-btn active px-4 py-2 bg-white border border-tanira-brown/20 text-tanira-brown rounded-full text-xs font-bold shadow-sm whitespace-nowrap transition">Semua</button>
+            <button onclick="filterRequests('pending', this)" class="filter-btn px-4 py-2 bg-transparent border border-gray-200 text-gray-500 rounded-full text-xs font-bold hover:bg-white transition whitespace-nowrap">Perlu Konfirmasi</button>
+            <button onclick="filterRequests('booked', this)" class="filter-btn px-4 py-2 bg-transparent border border-gray-200 text-gray-500 rounded-full text-xs font-bold hover:bg-white transition whitespace-nowrap">Sedang Disewa</button>
+        </div>
+
+        <!-- LIST REQUESTS -->
+        <section id="request-list" class="space-y-4">
+            
+            <% if (requests.length > 0) { %>
+                <% requests.forEach((req, index) => { %>
+                <!-- Tambahkan atribut data-status untuk filter -->
+                <div id="card-<%= req.id %>" data-status="<%= req.status %>" class="req-card bg-white rounded-2xl p-5 shadow-sm border-l-4 <%= req.status === 'pending' ? 'border-tanira-brown' : (req.status === 'booked' ? 'border-green-500' : 'border-gray-300') %> hover:shadow-md transition animate-enter" style="animation-delay: <%= index * 100 %>ms">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex gap-4">
+                            <!-- User Avatar Placeholder -->
+                            <div class="w-12 h-12 rounded-full bg-tanira-cream flex items-center justify-center text-tanira-brown font-bold text-lg border-2 border-white shadow-sm">
+                                <%= req.user.name.charAt(0) %>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-tanira-dark"><%= req.user.name %></h3>
+                                <p class="text-xs text-tanira-gray"><%= req.user.farmerProfile ? req.user.farmerProfile.location : 'Lokasi Petani' %></p>
+                                <div class="mt-1 flex gap-2">
+                                    <span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded text-gray-600 font-medium">
+                                        <i class="fa-solid fa-tractor mr-1"></i> <%= req.tool.toolName %>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-gray-100 text-gray-500 uppercase"><%= req.status %></span>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-xl p-3 flex justify-between items-center mb-4">
+                        <div>
+                            <p class="text-[10px] text-gray-400 uppercase font-bold">Durasi Sewa</p>
+                            <p class="text-sm font-bold text-tanira-dark">
+                                <%= helpers.formatDate(req.startDate) %> - <%= helpers.formatDate(req.endDate) %>
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] text-gray-400 uppercase font-bold">Total Biaya</p>
+                            <% 
+                                const diffTime = Math.abs(new Date(req.endDate) - new Date(req.startDate));
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; 
+                                const total = diffDays * req.tool.pricePerDay;
+                            %>
+                            <p class="text-sm font-bold text-tanira-brown"><%= helpers.formatRupiah(total) %></p>
+                        </div>
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <% if (req.status === 'pending') { %> 
+                    <div class="flex gap-3">
+                        <button onclick="confirmAction(<%= req.id %>, 'reject', 'Tolak Permintaan?')" class="flex-1 py-2.5 border border-gray-200 text-gray-500 font-bold rounded-xl text-xs hover:bg-gray-50 transition">
+                            Tolak
+                        </button>
+                        <button onclick="confirmAction(<%= req.id %>, 'approve', 'Terima Penyewaan?')" class="flex-1 py-2.5 bg-tanira-brown text-white font-bold rounded-xl text-xs hover:bg-[#5D4037] transition shadow-md shadow-tanira-brown/20">
+                            Terima Sewa
+                        </button>
+                    </div>
+                    <% } else if (req.status === 'booked') { %>
+                        <button onclick="confirmAction(<%= req.id %>, 'complete', 'Selesaikan Pesanan?')" class="w-full py-2.5 bg-green-100 text-green-700 font-bold rounded-xl text-xs hover:bg-green-200 transition">
+                            Selesaikan Pesanan
+                        </button>
+                    <% } %>
+                </div>
+                <% }) %>
+            <% } else { %>
+                <!-- Empty State -->
+                <div id="empty-state" class="py-12 flex flex-col items-center justify-center text-center animate-enter">
+                    <div class="w-32 h-32 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa-regular fa-folder-open text-4xl text-gray-300"></i>
+                    </div>
+                    <p class="text-tanira-gray text-sm">Belum ada permintaan sewa baru.</p>
+                </div>
+            <% } %>
+
+            <!-- Empty Filter State (Hidden by default) -->
+            <div id="filter-empty" class="hidden py-12 flex flex-col items-center justify-center text-center">
+                <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                    <i class="fa-solid fa-filter-circle-xmark text-2xl text-gray-300"></i>
+                </div>
+                <p class="text-tanira-gray text-sm">Tidak ada permintaan dengan status ini.</p>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- CONFIRMATION MODAL -->
+    <div id="confirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity opacity-0" id="modalBackdrop"></div>
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm relative z-10 transform scale-95 opacity-0 transition-all duration-300 p-6" id="modalContent">
+            
+            <div class="w-12 h-12 bg-tanira-brown/10 rounded-full flex items-center justify-center text-tanira-brown text-xl mb-4 mx-auto">
+                <i class="fa-solid fa-circle-question"></i>
+            </div>
+            
+            <h3 class="text-xl font-bold text-tanira-dark text-center mb-2" id="modalTitle">Konfirmasi</h3>
+            <p class="text-sm text-center text-tanira-gray mb-6">
+                Apakah Anda yakin ingin melanjutkan tindakan ini?
+            </p>
+
+            <div class="flex flex-col gap-3">
+                <button id="confirmBtn" class="w-full py-3 rounded-xl bg-tanira-brown text-white font-bold hover:bg-[#5D4037] transition">
+                    Ya, Lanjutkan
+                </button>
+                <button onclick="closeModal()" class="w-full py-3 rounded-xl text-gray-500 font-bold hover:bg-gray-50 transition">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 flex items-center w-full max-w-xs p-4 space-x-4 bg-white rounded-xl shadow-2xl border hidden z-50 transition-all duration-300 translate-y-[-20px] opacity-0" role="alert">
+        <div id="toast-icon" class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg"></div>
+        <div class="ml-3 text-sm font-normal text-tanira-dark" id="toast-message"></div>
+    </div>
+
+    <script>
+        // --- TOAST FUNCTION ---
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const msg = document.getElementById('toast-message');
+
+            msg.innerText = message;
+            
+            if (type === 'success') {
+                toast.classList.add('border-green-100');
+                icon.className = "inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg";
+                icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else {
+                toast.classList.add('border-red-100');
+                icon.className = "inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg";
+                icon.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+            }
+
+            toast.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-[-20px]', 'opacity-0');
+            });
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-20px]', 'opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        // --- FILTER FUNCTION ---
+        function filterRequests(status, btn) {
+            // Update Active State Button
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('bg-white', 'border-tanira-brown/20', 'text-tanira-brown', 'shadow-sm');
+                b.classList.add('bg-transparent', 'border-gray-200', 'text-gray-500');
+            });
+            btn.classList.remove('bg-transparent', 'border-gray-200', 'text-gray-500');
+            btn.classList.add('bg-white', 'border-tanira-brown/20', 'text-tanira-brown', 'shadow-sm');
+
+            // Filter Logic
+            const cards = document.querySelectorAll('.req-card');
+            let hasVisible = false;
+
+            cards.forEach(card => {
+                const cardStatus = card.getAttribute('data-status');
+                if (status === 'all' || cardStatus === status) {
+                    card.classList.remove('hidden');
+                    hasVisible = true;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            // Show/Hide Empty State
+            const emptyState = document.getElementById('filter-empty');
+            const mainEmpty = document.getElementById('empty-state');
+            
+            if(mainEmpty) mainEmpty.classList.add('hidden'); // Hide main empty if filtering
+            
+            if (!hasVisible && cards.length > 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+        }
+
+        // --- MODAL & ACTION LOGIC ---
+        let currentAction = null;
+        let currentId = null;
+
+        const modal = document.getElementById('confirmModal');
+        const backdrop = document.getElementById('modalBackdrop');
+        const content = document.getElementById('modalContent');
+        const modalTitle = document.getElementById('modalTitle');
+        const confirmBtn = document.getElementById('confirmBtn');
+
+        function confirmAction(id, action, title) {
+            currentId = id;
+            currentAction = action;
+            modalTitle.innerText = title;
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            backdrop.classList.add('opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        confirmBtn.onclick = async () => {
+            if(!currentId || !currentAction) return;
+
+            // UI Loading
+            confirmBtn.disabled = true;
+            confirmBtn.innerText = "Memproses...";
+
+            try {
+                const response = await fetch('/producer/request/' + currentId + '/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: currentAction })
+                });
+                
+                const res = await response.json();
+                
+                if(res.success) {
+                    closeModal();
+                    showToast("Permintaan berhasil diproses!", "success");
+                    
+                    // Delay reload agar toast terlihat
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    closeModal();
+                    showToast('Gagal memproses.', "error");
+                }
+            } catch(e) {
+                console.error(e);
+                closeModal();
+                showToast('Error koneksi', "error");
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.innerText = "Ya, Lanjutkan";
+            }
+        };
+    </script>
+</body>
+</html>

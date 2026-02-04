@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32',
+                            brown: '#6D4C41',
+                            cream: '#F9F7F2',
+                            dark: '#1F2937',
+                            gray: '#6B7280',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24 md:pb-10">
+
+    <!-- NAV -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+        <div class="max-w-2xl mx-auto flex items-center gap-4">
+            <a href="/market/orders" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-tanira-dark">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-lg leading-none">Detail Pesanan</h1>
+                <p class="text-xs text-tanira-gray mt-0.5">ID: #ORD-<%= order.id %></p>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-2xl mx-auto px-4 py-6 space-y-6">
+
+        <!-- STATUS TRACKER (FIXED TIMELINE FLEX) -->
+        <section class="bg-white rounded-2xl p-6 shadow-soft border border-gray-50">
+            <h2 class="font-bold text-tanira-dark mb-6">Status Pesanan</h2>
+            
+            <div class="">
+                <% steps.forEach((step, index) => { 
+                    const isCompleted = index <= currentStepIndex;
+                    const isCurrent = index === currentStepIndex;
+                    const isLast = index === steps.length - 1;
+                    
+                    let iconBg = isCompleted ? "bg-tanira-green text-white" : "bg-gray-100 text-gray-300";
+                    let ringClass = isCurrent ? "ring-4 ring-green-50" : "";
+                    let labelColor = isCompleted ? "text-tanira-dark font-bold" : "text-gray-400 font-medium";
+                    let descColor = "text-gray-400";
+                    
+                    if (isCurrent) {
+                        labelColor = "text-tanira-green font-bold";
+                        descColor = "text-tanira-dark";
+                    }
+                %>
+                <div class="flex gap-4">
+                    <!-- Column 1: Icon & Line -->
+                    <div class="flex flex-col items-center">
+                        <!-- Icon Circle -->
+                        <div class="z-10 relative <%= iconBg %> <%= ringClass %> w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 transition-all duration-300 border-2 border-white shadow-sm">
+                            <i class="fa-solid <%= step.icon %>"></i>
+                        </div>
+                        
+                        <!-- Connecting Line -->
+                        <% if (!isLast) { %>
+                            <div class="w-0.5 flex-1 my-1 <%= index < currentStepIndex ? 'bg-tanira-green' : 'bg-gray-200' %>"></div>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Column 2: Content -->
+                    <div class="pb-8 pt-1 <%= isLast ? 'pb-0' : '' %>">
+                        <h3 class="text-sm <%= labelColor %> leading-none"><%= step.label %></h3>
+                        
+                        <% if(isCurrent) { %>
+                            <p class="text-xs <%= descColor %> mt-2 bg-green-50 px-3 py-2 rounded-lg border border-green-100 inline-block">
+                                Pesanan Anda saat ini berada di tahap ini.
+                            </p>
+                        <% } %>
+                        
+                        <% if (isCompleted && !isCurrent) { %>
+                            <p class="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
+                                <i class="fa-solid fa-check text-tanira-green"></i> Selesai
+                            </p>
+                        <% } %>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+        </section>
+
+        <!-- PRODUK INFO -->
+        <section class="bg-white rounded-2xl p-5 shadow-soft border border-gray-50">
+            <div class="flex gap-4 mb-4 pb-4 border-b border-gray-100">
+                <div class="w-20 h-20 rounded-xl bg-gray-100 overflow-hidden shrink-0">
+                    <img src="<%= order.listing.imageUrl || 'https://placehold.co/150?text=Produk' %>" 
+                         class="w-full h-full object-cover"
+                         onerror="this.src='https://placehold.co/150?text=No+Image'">
+                </div>
+                <div>
+                    <h3 class="font-bold text-tanira-dark text-lg"><%= order.listing.crop.name %></h3>
+                    <p class="text-xs text-tanira-gray mb-1">Petani: <%= order.listing.user.name %></p>
+                    <p class="text-xs text-tanira-gray"><i class="fa-solid fa-location-dot text-tanira-green mr-1"></i> <%= order.listing.user.farmerProfile ? order.listing.user.farmerProfile.location : '-' %></p>
+                </div>
+            </div>
+
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Harga Satuan</span>
+                    <span class="font-medium text-tanira-dark"><%= helpers.formatRupiah(order.listing.price) %></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Jumlah</span>
+                    <span class="font-medium text-tanira-dark"><%= order.quantity %> Kg</span>
+                </div>
+                <div class="flex justify-between pt-2 border-t border-dashed border-gray-200 mt-2">
+                    <span class="font-bold text-tanira-dark">Total Pembayaran</span>
+                    <span class="font-bold text-tanira-green text-lg"><%= helpers.formatRupiah(order.totalPrice) %></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ACTION BUTTONS -->
+        <section class="space-y-3">
+            <a href="https://wa.me/<%= order.listing.user.phone %>" target="_blank" class="flex w-full items-center justify-center gap-2 bg-green-50 text-green-700 font-bold py-3.5 rounded-xl hover:bg-green-100 transition border border-green-200">
+                <i class="fa-brands fa-whatsapp text-lg"></i> Hubungi Petani
+            </a>
+            
+            <% if (order.status === 'finished') { %>
+                <button class="w-full bg-tanira-green text-white font-bold py-3.5 rounded-xl hover:bg-tanira-greenDark transition shadow-lg shadow-tanira-green/30">
+                    Beri Ulasan
+                </button>
+            <% } %>
+        </section>
+
+    </main>
+
+</body>
+</html>

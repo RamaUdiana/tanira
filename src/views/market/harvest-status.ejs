@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32', greenLight: '#E8F5E9', greenDark: '#1B5E20',
+                            brown: '#6D4C41', cream: '#F9F7F2', dark: '#1F2937',
+                            gray: '#6B7280', accent: '#F59E0B',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-enter { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .animate-toast { animation: slideInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .delay-100 { animation-delay: 100ms; } .delay-200 { animation-delay: 200ms; } .delay-300 { animation-delay: 300ms; }
+        .progress-bar-fill { transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24 md:pb-10">
+
+    <!-- NAVIGATION -->
+    <nav class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+        <div class="max-w-2xl mx-auto flex items-center gap-4">
+            <a href="/market/manage/<%= listing.id %>" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-tanira-dark">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-lg leading-none">Status Panen</h1>
+                <p class="text-xs text-tanira-gray mt-0.5">Update berkala untuk pembeli</p>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-2xl mx-auto px-4 py-6 space-y-8">
+
+        <!-- 1. HEADER KONTEKS -->
+        <section class="animate-enter bg-white rounded-2xl p-6 shadow-soft border-l-4 border-tanira-green">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs text-tanira-gray uppercase font-bold tracking-wider mb-1">Tanaman</p>
+                    <h2 class="text-xl font-bold text-tanira-dark"><%= listing.crop.name %></h2>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-tanira-gray uppercase font-bold tracking-wider mb-1">Estimasi Panen</p>
+                    <p class="text-lg font-bold text-tanira-green"><%= helpers.formatDate(listing.harvestDate) %></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. OVERALL PROGRESS -->
+        <% 
+            // DEFENSIVE CODING: Pastikan nilai aman
+            const safeProgress = (typeof progressPercent !== 'undefined' && !isNaN(progressPercent)) ? progressPercent : 0;
+            const safeStageIdx = (typeof listing.progressStage === 'number') ? listing.progressStage : 0;
+            const currentStage = stages[safeStageIdx] || stages[0];
+        %>
+        <section class="animate-enter delay-100">
+            <div class="flex justify-between items-end mb-2 px-1">
+                <h3 class="font-bold text-tanira-dark">Kemajuan Tanam</h3>
+                <span class="text-2xl font-bold text-tanira-green" id="progress-text"><%= safeProgress %>%</span>
+            </div>
+            <div class="w-full h-4 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+                <div id="main-progress-bar" 
+                     class="progress-bar-fill h-full bg-tanira-green relative" 
+                     style="width: 0%" 
+                     data-width="<%= safeProgress %>%">
+                    <div class="absolute inset-0 bg-white/20 w-full h-full animate-pulse"></div>
+                </div>
+            </div>
+            <p class="text-xs text-tanira-gray mt-2 px-1">
+                Tahap saat ini: <span class="font-bold text-tanira-dark"><%= currentStage.title %></span>
+            </p>
+        </section>
+
+        <!-- 3. TIMELINE PROGRESS (Dynamic Loop) -->
+        <section class="animate-enter delay-200 relative pl-4">
+            <!-- Vertical Line Background -->
+            <div class="absolute left-[27px] top-4 bottom-4 w-0.5 bg-gray-200 -z-10"></div>
+            <!-- Active Line -->
+            <div id="active-line" class="absolute left-[27px] top-4 w-0.5 bg-tanira-green -z-10 transition-all duration-1000" style="height: 0%" data-height="<%= safeProgress %>%"></div>
+
+            <div class="space-y-8" id="timeline-container">
+                <% stages.forEach((stage, index) => { 
+                    let statusClass, iconClass, textClass, statusText;
+                    
+                    if (index < safeStageIdx) {
+                        // COMPLETED (Hijau)
+                        statusClass = "bg-tanira-green text-white ring-4 ring-green-50";
+                        iconClass = "text-white";
+                        textClass = "text-tanira-dark";
+                        statusText = "Selesai";
+                    } else if (index === safeStageIdx) {
+                        // CURRENT (Oranye/Aktif)
+                        statusClass = "bg-tanira-accent text-white ring-4 ring-orange-100 animate-pulse";
+                        iconClass = "text-white";
+                        textClass = "text-tanira-dark font-bold";
+                        statusText = "Sedang Berjalan";
+                    } else {
+                        // PENDING (Abu)
+                        statusClass = "bg-gray-200 text-gray-400";
+                        iconClass = "text-gray-400";
+                        textClass = "text-gray-400";
+                        statusText = "Belum Dimulai";
+                    }
+                %>
+                
+                <div class="relative flex items-center gap-4 group">
+                    <!-- Bullet Icon -->
+                    <div class="z-10 flex items-center justify-center w-6 h-6 rounded-full shrink-0 transition-all duration-500 <%= statusClass %>">
+                        <i class="fa-solid <%= stage.icon %> text-[10px] <%= iconClass %>"></i>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex-1 transition-all duration-300 hover:shadow-md hover:border-tanira-green/20">
+                        <h3 class="text-sm font-bold <%= textClass %>"><%= stage.title %></h3>
+                        <p class="text-xs <%= index === safeStageIdx ? 'text-tanira-accent font-semibold' : 'text-gray-400' %>">
+                            <%= statusText %>
+                        </p>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+        </section>
+
+        <!-- 4. UPDATE TERAKHIR -->
+        <% if (listing.lastLogDate) { %>
+        <section class="animate-enter delay-300 bg-white rounded-2xl p-5 shadow-soft border border-gray-100">
+            <div class="flex items-center gap-2 mb-3">
+                <i class="fa-regular fa-clock text-tanira-gray"></i>
+                <h3 class="text-sm font-bold text-tanira-gray uppercase tracking-wider">Update Terakhir</h3>
+            </div>
+            <div class="bg-tanira-cream rounded-xl p-4 border border-tanira-brown/10">
+                <p class="text-sm text-tanira-dark italic mb-2">"<%= listing.lastLogMessage || 'Tidak ada catatan khusus.' %>"</p>
+                <div class="flex justify-between items-center">
+                    <p class="text-xs text-tanira-gray font-medium">
+                        <%= new Date(listing.lastLogDate).toLocaleString('id-ID', { weekday:'long', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) %>
+                    </p>
+                </div>
+            </div>
+        </section>
+        <% } %>
+
+        <!-- 5. AKSI UPDATE (Form) -->
+        <section class="animate-enter delay-400">
+            <h3 class="font-bold text-tanira-dark mb-4 px-1">Perbarui Perkembangan</h3>
+            
+            <form id="updateForm" class="bg-white rounded-2xl shadow-soft p-6 space-y-4">
+                <input type="hidden" id="listingId" value="<%= listing.id %>">
+                
+                <div>
+                    <label class="block text-sm font-bold text-tanira-dark mb-2">Tahap Saat Ini</label>
+                    <div class="relative">
+                        <select id="stageSelect" class="w-full appearance-none bg-gray-50 border border-gray-200 text-tanira-dark text-sm rounded-xl focus:ring-tanira-green focus:border-tanira-green block w-full p-3 font-medium transition cursor-pointer hover:bg-gray-100">
+                            <% stages.forEach(stage => { %>
+                                <option value="<%= stage.id %>" <%= stage.id === safeStageIdx ? 'selected' : '' %>>
+                                    <%= stage.id + 1 %>. <%= stage.title %>
+                                </option>
+                            <% }) %>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-tanira-green">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-tanira-dark mb-2">Catatan untuk Pembeli (Opsional)</label>
+                    <textarea id="noteInput" class="block p-3 w-full text-sm text-tanira-dark bg-gray-50 rounded-xl border border-gray-200 focus:ring-tanira-green focus:border-tanira-green transition placeholder-gray-400" rows="3" placeholder="Ceritakan kondisi tanaman atau cuaca..."></textarea>
+                </div>
+
+                <button type="button" onclick="submitUpdate()" id="btnSubmit" class="w-full text-white bg-tanira-green hover:bg-tanira-greenDark focus:ring-4 focus:ring-green-300 font-bold rounded-xl text-sm px-5 py-3.5 text-center shadow-lg shadow-tanira-green/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    Perbarui Status Panen
+                </button>
+            </form>
+        </section>
+
+    </main>
+
+    <!-- SUCCESS TOAST (Hidden by default) -->
+    <div id="toast-success" class="fixed top-4 left-1/2 transform -translate-x-1/2 flex items-center w-full max-w-xs p-4 space-x-4 text-gray-500 bg-white rounded-xl shadow-2xl border border-green-100 hidden z-50 transition-all duration-300" role="alert">
+        <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        <div class="ml-3 text-sm font-normal text-tanira-dark">Status panen berhasil diperbarui.</div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Animasi Load Awal
+            setTimeout(() => {
+                const bar = document.getElementById('main-progress-bar');
+                const line = document.getElementById('active-line');
+                if(bar) bar.style.width = bar.getAttribute('data-width');
+                if(line) line.style.height = line.getAttribute('data-height');
+            }, 300);
+        });
+
+        async function submitUpdate() {
+            const btn = document.getElementById('btnSubmit');
+            const originalText = btn.innerHTML;
+            const listingId = document.getElementById('listingId').value;
+            
+            // UI Loading
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Memproses...';
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+
+            const data = {
+                stage: document.getElementById('stageSelect').value,
+                note: document.getElementById('noteInput').value
+            };
+
+            try {
+                const response = await fetch('/market/status/' + listingId, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Show Toast
+                    const toast = document.getElementById('toast-success');
+                    toast.classList.remove('hidden', '-translate-y-10', 'opacity-0');
+                    
+                    // Reload page after short delay to see changes
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    alert('Gagal: ' + result.message);
+                    resetBtn(btn, originalText);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Terjadi kesalahan koneksi.');
+                resetBtn(btn, originalText);
+            }
+        }
+
+        function resetBtn(btn, text) {
+            btn.innerHTML = text;
+            btn.disabled = false;
+            btn.classList.remove('opacity-75', 'cursor-not-allowed');
+        }
+    </script>
+</body>
+</html>

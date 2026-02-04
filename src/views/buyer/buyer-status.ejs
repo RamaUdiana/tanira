@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32',
+                            brown: '#6D4C41',
+                            cream: '#F9F7F2',
+                            dark: '#1F2937',
+                            gray: '#6B7280',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24 md:pb-10">
+
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+        <div class="max-w-2xl mx-auto">
+            <h1 class="font-bold text-lg leading-none">Pesanan Saya</h1>
+        </div>
+    </nav>
+
+    <main class="max-w-2xl mx-auto px-4 py-6 space-y-4">
+
+        <% if (orders.length > 0) { %>
+            <% orders.forEach(order => { %>
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-transparent hover:shadow-md transition">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex gap-4">
+                        <div class="w-14 h-14 rounded-xl bg-gray-100 overflow-hidden shrink-0">
+                            <!-- UPDATE: Gunakan gambar listing -->
+                            <img src="<%= order.listing.imageUrl || 'https://placehold.co/100?text=No+Image' %>" 
+                                 class="w-full h-full object-cover"
+                                 onerror="this.src='https://placehold.co/100?text=No+Image'"> 
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-tanira-dark"><%= order.listing.crop.name %></h3>
+                            <p class="text-xs text-tanira-gray">Petani: <%= order.listing.user.name %></p>
+                            <p class="text-xs text-tanira-gray mt-1"><%= helpers.formatDate(order.createdAt) %></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Badge -->
+                    <% 
+                        let badgeClass = "bg-gray-100 text-gray-500";
+                        if (order.status === 'pending') badgeClass = "bg-orange-50 text-orange-600";
+                        else if (order.status === 'paid') badgeClass = "bg-blue-50 text-blue-600";
+                        else if (order.status === 'finished') badgeClass = "bg-green-50 text-green-600";
+                    %>
+                    <span class="text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider <%= badgeClass %>">
+                        <%= order.status %>
+                    </span>
+                </div>
+
+                <div class="flex justify-between items-end border-t border-gray-50 pt-3">
+                    <div>
+                        <p class="text-[10px] text-gray-400 uppercase font-bold">Total (<%= order.quantity %> Kg)</p>
+                        <p class="text-sm font-bold text-tanira-green"><%= helpers.formatRupiah(order.totalPrice) %></p>
+                    </div>
+                    <a href="/market/orders/<%= order.id %>" class="px-4 py-2 bg-gray-100 text-tanira-dark text-xs font-bold rounded-lg hover:bg-gray-200 transition inline-block text-center">
+                        Detail
+                    </a>
+                </div>
+            </div>
+            <% }) %>
+        <% } else { %>
+            <div class="py-12 text-center">
+                <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm text-gray-200 text-4xl">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <p class="text-gray-400 text-sm">Belum ada pesanan aktif.</p>
+                <a href="/market" class="inline-block mt-4 text-tanira-green font-bold text-sm hover:underline">Mulai Belanja</a>
+            </div>
+        <% } %>
+
+    </main>
+
+    <!-- MOBILE NAV -->
+    <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 px-6 py-3 md:hidden z-50">
+        <div class="flex justify-between items-center">
+            <a href="/market" class="flex flex-col items-center gap-1 text-gray-400 group hover:text-tanira-green transition">
+                <i class="fa-solid fa-store text-lg"></i>
+                <span class="text-[10px] font-medium">Pasar</span>
+            </a>
+            <!-- Active State -->
+            <a href="/market/orders" class="flex flex-col items-center gap-1 text-tanira-green group">
+                <i class="fa-solid fa-receipt text-lg"></i>
+                <span class="text-[10px] font-bold">Pesanan</span>
+            </a>
+            <!-- <a href="/auth/logout" class="flex flex-col items-center gap-1 text-gray-400 group hover:text-red-500 transition">
+                <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                <span class="text-[10px] font-medium">Keluar</span>
+            </a> -->
+        </div>
+    </div>
+
+</body>
+</html>

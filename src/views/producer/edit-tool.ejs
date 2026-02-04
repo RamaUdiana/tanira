@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32',
+                            brown: '#6D4C41',
+                            cream: '#F9F7F2',
+                            dark: '#1F2937',
+                            gray: '#6B7280',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24 md:pb-10">
+
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+        <div class="max-w-5xl mx-auto flex items-center gap-4">
+            <a href="/producer/tool/<%= tool.id %>" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-tanira-dark">
+                <i class="fa-solid fa-xmark"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-lg leading-none">Edit Alat</h1>
+                <p class="text-xs text-tanira-gray mt-0.5"><%= tool.toolName %></p>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 py-8">
+        <div class="grid lg:grid-cols-12 gap-8 items-start">
+            
+            <div class="lg:col-span-7 space-y-8">
+                <section class="animate-enter">
+                    <form id="editForm" class="bg-white rounded-2xl shadow-soft p-6 md:p-8 space-y-6 border-t-4 border-tanira-brown" enctype="multipart/form-data">
+                        
+                        <input type="hidden" id="toolId" value="<%= tool.id %>">
+
+                        <!-- FOTO (Optional update) -->
+                        <div>
+                            <label class="block text-sm font-bold text-tanira-dark mb-2">Foto Alat (Biarkan kosong jika tidak diganti)</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-tanira-brown transition bg-gray-50 cursor-pointer" onclick="document.getElementById('input-image').click()">
+                                <input type="file" id="input-image" name="image" accept="image/*" class="hidden" onchange="previewImage(this)">
+                                <div id="image-preview-container" class="relative w-full h-48 rounded-lg overflow-hidden">
+                                    <img id="image-preview-src" src="<%= tool.imageUrl || 'https://placehold.co/600x400' %>" class="w-full h-full object-cover">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nama -->
+                        <div>
+                            <label class="block text-sm font-bold text-tanira-dark mb-2">Nama Alat / Produk</label>
+                            <input type="text" name="name" value="<%= tool.toolName %>" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-tanira-brown transition text-lg font-bold">
+                        </div>
+
+                        <!-- Kategori & Harga -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-tanira-dark mb-2">Kategori</label>
+                                <select name="category" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none bg-white cursor-pointer">
+                                    <option <%= tool.category === 'Alat Berat' ? 'selected' : '' %>>Alat Berat</option>
+                                    <option <%= tool.category === 'Alsintan Ringan' ? 'selected' : '' %>>Alsintan Ringan</option>
+                                    <option <%= tool.category === 'Bibit & Pupuk' ? 'selected' : '' %>>Bibit & Pupuk</option>
+                                    <option <%= tool.category === 'Jasa Tanam' ? 'selected' : '' %>>Jasa Tanam</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-tanira-dark mb-2">Harga Sewa / Jual</label>
+                                <input type="number" name="price" value="<%= tool.pricePerDay %>" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-tanira-brown transition font-bold text-tanira-brown">
+                            </div>
+                        </div>
+
+                        <!-- Deskripsi -->
+                        <div>
+                            <label class="block text-sm font-bold text-tanira-dark mb-2">Deskripsi</label>
+                            <textarea name="description" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none transition text-sm"><%= tool.description %></textarea>
+                        </div>
+
+                        <!-- Status & Lokasi -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-tanira-dark mb-2">Status</label>
+                                <select name="status" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none bg-white">
+                                    <option value="Tersedia" <%= tool.availability ? 'selected' : '' %>>Tersedia</option>
+                                    <option value="Tidak Tersedia" <%= !tool.availability ? 'selected' : '' %>>Tidak Tersedia</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-tanira-dark mb-2">Lokasi</label>
+                                <input type="text" name="location" value="<%= tool.location %>" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="saveTool()" id="btn-save" class="w-full bg-tanira-brown hover:bg-[#5D4037] text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                            Simpan Perubahan
+                        </button>
+
+                    </form>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 flex items-center w-full max-w-xs p-4 space-x-4 bg-white rounded-xl shadow-2xl border hidden z-50 transition-all duration-300 translate-y-[-20px] opacity-0" role="alert">
+        <div id="toast-icon" class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg"></div>
+        <div class="ml-3 text-sm font-normal text-tanira-dark" id="toast-message"></div>
+    </div>
+
+    <script>
+        // --- TOAST FUNCTION ---
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const msg = document.getElementById('toast-message');
+
+            // Set Content
+            msg.innerText = message;
+            
+            if (type === 'success') {
+                toast.classList.add('border-green-100');
+                icon.className = "inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg";
+                icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else {
+                toast.classList.add('border-red-100');
+                icon.className = "inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg";
+                icon.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+            }
+
+            // Show Animation
+            toast.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-[-20px]', 'opacity-0');
+            });
+            
+            // Hide after 3s
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-20px]', 'opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        function previewImage(input) {
+            const file = input.files[0];
+            if (file) {
+                // Validate Size (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('Ukuran gambar terlalu besar! Maksimal 5MB.', 'error');
+                    input.value = ""; 
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('image-preview-src').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function saveTool() {
+            const btn = document.getElementById('btn-save');
+            const originalText = btn.innerText;
+            btn.innerText = "Menyimpan...";
+            btn.disabled = true;
+
+            const toolId = document.getElementById('toolId').value;
+            const formData = new FormData(document.getElementById('editForm'));
+
+            try {
+                const response = await fetch('/producer/edit-tool/' + toolId, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if(result.success) {
+                    showToast("Alat berhasil diupdate!", "success");
+                    setTimeout(() => {
+                        window.location.href = result.redirectUrl;
+                    }, 1500);
+                } else {
+                    showToast('Gagal: ' + result.message, "error");
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Terjadi kesalahan koneksi', "error");
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

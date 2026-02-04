@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TANIRA - Akses Ditolak</title>
+    <!-- Favicon jika ada -->
+    <!-- <link rel="icon" href="/logo/logo.png" type="image/png"> -->
+
+    <!-- Fonts & Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32',      
+                            greenLight: '#4CAF50',
+                            greenDark: '#1B5E20',
+                            brown: '#6D4C41',      
+                            cream: '#F9F7F2',      
+                            dark: '#1F2937',       
+                            gray: '#4B5563',       
+                            accent: '#F59E0B',     
+                        }
+                    },
+                    backgroundImage: {
+                        'pattern-leaf': "url('data:image/svg+xml,%3Csvg width=\\'60\\' height=\\'60\\' viewBox=\\'0 0 60 60\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Cg fill=\\'%232f7d32\\' fill-opacity=\\'0.05\\'%3E%3Cpath d=\\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')",
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans text-tanira-dark bg-tanira-cream antialiased selection:bg-tanira-green selection:text-white bg-pattern-leaf h-screen flex items-center justify-center overflow-hidden">
+
+    <div class="max-w-4xl mx-auto px-6 py-12 relative z-10 text-center">
+        
+        <!-- Illustration Area -->
+        <div class="relative mb-8 inline-block">
+            <!-- Main 403 Text -->
+            <h1 class="text-9xl md:text-[12rem] font-bold text-tanira-dark/10 select-none">403</h1>
+            
+            <!-- Overlay Image/Icon -->
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="w-32 h-32 md:w-40 md:h-40 bg-white rounded-full shadow-xl flex items-center justify-center border-4 border-tanira-cream animate-bounce" style="animation-duration: 3s;">
+                    <!-- Gembok Icon -->
+                    <i class="fa-solid fa-user-lock text-6xl md:text-7xl text-tanira-brown"></i>
+                </div>
+            </div>
+            
+            <!-- Floating Elements (Sign Warning) -->
+            <div class="absolute top-1/4 -right-4 md:-right-12 animate-pulse" style="animation-duration: 2s;">
+                <i class="fa-solid fa-ban text-red-400 text-5xl opacity-80 rotate-12"></i>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="space-y-6 relative z-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-tanira-dark">
+                Area Terbatas! 🚧
+            </h2>
+            <p class="text-tanira-gray text-lg max-w-lg mx-auto leading-relaxed">
+                Maaf, Anda tidak memiliki izin untuk memasuki lahan ini. <br>
+                Silakan kembali ke area yang sesuai dengan peran Anda.
+            </p>
+
+            <!-- LOGIC LINK DINAMIS -->
+            <% 
+                let backLink = '/'; // Default ke Landing Page
+                if (typeof user !== 'undefined' && user) {
+                    if (user.role === 'pembeli') {
+                        backLink = '/market';
+                    } else if (user.role === 'penyedia') {
+                        backLink = '/producer';
+                    } else if (user.role === 'petani') {
+                        backLink = '/dashboard';
+                    }
+                }
+            %>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+                <a href="<%= backLink %>" class="px-8 py-4 bg-tanira-green hover:bg-tanira-greenDark text-white rounded-xl font-bold transition shadow-lg shadow-tanira-green/30 flex items-center gap-2 group">
+                    <i class="fa-solid fa-house"></i> Kembali ke Dashboard
+                </a>
+                
+                <!-- Tombol Login (Opsional, jika user ingin ganti akun) -->
+                <a href="/auth/login" class="px-8 py-4 bg-white border border-gray-200 hover:bg-gray-50 text-tanira-gray rounded-xl font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Ganti Akun
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

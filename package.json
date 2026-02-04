@@ -1,0 +1,33 @@
+{
+  "name": "tanira",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "tailwind": "npx tailwindcss@3 -i ./src/public/css/input.css -o ./src/public/css/output.css --watch",
+    "build": "prisma generate",
+    "start": "node src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@prisma/client": "^6.19.2",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.3",
+    "ejs": "^4.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.18.2",
+    "multer": "^2.0.2",
+    "nodemailer": "^7.0.12",
+    "prisma": "^6.19.2"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.23",
+    "nodemon": "^3.1.11",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19"
+  }
+}

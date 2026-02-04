@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32', greenLight: '#E8F5E9', greenDark: '#1B5E20',
+                            brown: '#6D4C41', cream: '#F9F7F2', dark: '#1F2937',
+                            gray: '#6B7280', accent: '#F59E0B', surface: '#FFFFFF',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)', 'card': '0 10px 15px -3px rgba(0, 0, 0, 0.05)' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-enter { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .delay-100 { animation-delay: 100ms; } .delay-200 { animation-delay: 200ms; } .delay-300 { animation-delay: 300ms; }
+        .order-card { transition: all 0.3s ease; }
+        .order-card:hover { transform: translateY(-4px); box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen pb-24 md:pb-10">
+
+    <!-- NAVIGATION -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4">
+        <div class="max-w-5xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="/dashboard" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-tanira-dark">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="font-bold text-lg leading-none">Pre-Order Saya</h1>
+                    <p class="text-xs text-tanira-gray mt-0.5">Kelola penawaran panen</p>
+                </div>
+            </div>
+            
+            <!-- Link ke Dashboard untuk memilih Plan -->
+            <a href="/dashboard" class="hidden md:flex bg-tanira-green hover:bg-tanira-greenDark text-white px-4 py-2 rounded-lg text-sm font-bold items-center gap-2 transition" title="Pilih Rencana Tanam di Dashboard untuk dijual">
+                <i class="fa-solid fa-plus"></i> Tambah via Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+        <% if (listings.length > 0) { %>
+            <!-- 1. SUMMARY STATS -->
+            <div id="stats-section" class="grid grid-cols-2 md:grid-cols-3 gap-4 animate-enter">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+                    <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Total Aktif</div>
+                    <div class="flex items-end gap-2">
+                        <span class="text-2xl font-bold text-tanira-green"><%= stats.totalActive %></span>
+                        <span class="text-xs text-gray-500 mb-1">Penawaran</span>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+                    <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Total Panen</div>
+                    <div class="flex items-end gap-2">
+                        <span class="text-2xl font-bold text-tanira-dark"><%= stats.totalHarvestTon %></span>
+                        <span class="text-xs text-gray-500 mb-1">Ton Estimasi</span>
+                    </div>
+                </div>
+                <div class="bg-tanira-accent/10 p-4 rounded-2xl border border-tanira-accent/20 col-span-2 md:col-span-1 flex items-center justify-between">
+                    <div>
+                        <div class="text-xs text-tanira-accent font-bold uppercase tracking-wider mb-1">Peminat Tertinggi</div>
+                        <div class="font-bold text-tanira-dark"><%= stats.topCommodity %></div>
+                    </div>
+                    <i class="fa-solid fa-fire text-tanira-accent text-2xl opacity-50"></i>
+                </div>
+            </div>
+
+            <!-- 2. LIST VIEW -->
+            <div id="list-view" class="space-y-4">
+                <div class="flex items-center justify-between animate-enter delay-100">
+                    <h2 class="font-bold text-tanira-dark">Daftar Penawaran</h2>
+                    <button class="text-xs text-tanira-green font-semibold hover:underline">Filter Status</button>
+                </div>
+
+                <!-- Loop Listings -->
+                <% listings.forEach((item, index) => { %>
+                <div class="order-card bg-white rounded-2xl p-5 shadow-card border-l-4 <%= item.status === 'active' ? 'border-tanira-green' : 'border-gray-300' %> animate-enter" style="animation-delay: <%= (index + 1) * 100 %>ms">
+                    <div class="flex justify-between items-start mb-4 relative z-10">
+                        <div class="flex gap-4">
+                            <!-- UPDATE: Gambar Produk (Bukan Ikon) -->
+                            <div class="w-16 h-16 rounded-xl bg-gray-100 overflow-hidden shrink-0 relative border border-gray-100">
+                                <img src="<%= item.imageUrl || 'https://placehold.co/200?text=No+Image' %>" 
+                                     alt="<%= item.crop.name %>" 
+                                     class="w-full h-full object-cover"
+                                     onerror="this.src='https://placehold.co/200?text=No+Image';">
+                            </div>
+
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="font-bold text-lg text-tanira-dark"><%= item.crop.name %></h3>
+                                    <span class="<%= item.statusBadge.class %> text-[10px] px-2 py-0.5 rounded-full font-bold">
+                                        <%= item.statusBadge.text %>
+                                    </span>
+                                </div>
+                                <p class="text-xs text-gray-500">
+                                    <i class="fa-regular fa-calendar mr-1"></i> Panen: <%= helpers.formatDate(item.harvestDate) %>
+                                </p>
+                                <p class="text-sm font-bold text-tanira-green mt-1">
+                                    <%= helpers.formatRupiah(item.price) %> <span class="text-xs font-normal text-gray-400">/kg</span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Link ke Detail Manajemen -->
+                        <a href="/market/manage/<%= item.id %>" class="text-gray-300 hover:text-tanira-dark transition" title="Lihat Detail">
+                            <i class="fa-solid fa-arrow-up-right-from-square px-2"></i>
+                        </a>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="relative z-10">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-500">Terpesan: <strong><%= item.booked.toLocaleString('id-ID') %> Kg</strong></span>
+                            <span class="text-gray-400">Target: <%= item.quantity.toLocaleString('id-ID') %> Kg</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                            <div class="<%= item.progress >= 90 ? 'bg-tanira-accent' : 'bg-tanira-green' %> h-full rounded-full" style="width: <%= item.progress %>%"></div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center mt-4">
+                            <!-- Avatars for orders -->
+                            <% if(item.orders.length > 0) { %>
+                                <div class="flex -space-x-2">
+                                    <% for(let i=0; i<Math.min(item.orders.length, 3); i++) { %>
+                                        <div class="w-6 h-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[10px] text-gray-500 overflow-hidden">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                    <% } %>
+                                    <% if(item.orders.length > 3) { %>
+                                        <div class="w-6 h-6 rounded-full bg-tanira-cream border-2 border-white flex items-center justify-center text-[8px] font-bold text-tanira-brown">+<%= item.orders.length - 3 %></div>
+                                    <% } %>
+                                </div>
+                            <% } else { %>
+                                <span class="text-xs text-gray-400 italic">Belum ada pesanan</span>
+                            <% } %>
+
+                            <!-- LINK UTAMA: KELOLA PESANAN -->
+                            <a href="/market/manage/<%= item.id %>" class="text-sm font-bold text-tanira-green hover:underline flex items-center gap-1">
+                                Kelola Pesanan <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+
+        <% } else { %>
+
+            <!-- 3. EMPTY STATE -->
+            <div id="empty-view" class="flex flex-col items-center justify-center py-12 text-center animate-enter">
+                <div class="w-40 h-40 bg-white rounded-full flex items-center justify-center shadow-soft mb-6 relative">
+                    <i class="fa-solid fa-basket-shopping text-6xl text-gray-200"></i>
+                    <div class="absolute bottom-2 right-2 w-10 h-10 bg-tanira-accent rounded-full flex items-center justify-center text-white text-xl animate-bounce">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold text-tanira-dark mb-2">Belum Ada Pre-Order</h2>
+                <p class="text-tanira-gray max-w-xs mx-auto mb-8">
+                    Hasil panen Anda belum ditawarkan ke pembeli. Buat penawaran dari rencana tanam Anda.
+                </p>
+                <!-- Link CTA ke Dashboard -->
+                <a href="/dashboard" class="bg-tanira-green text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-tanira-green/30 hover:bg-tanira-greenDark transition transform hover:-translate-y-1 inline-flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    Pilih Rencana Tanam
+                </a>
+            </div>
+
+        <% } %>
+
+    </main>
+
+    <!-- FAB (Mobile Add Button) -->
+    <a href="/dashboard" class="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-tanira-green text-white rounded-full shadow-lg shadow-tanira-green/40 flex items-center justify-center text-2xl z-40 transition transform active:scale-95 hover:scale-110" title="Tambah via Dashboard">
+        <i class="fa-solid fa-plus"></i>
+    </a>
+
+</body>
+</html>

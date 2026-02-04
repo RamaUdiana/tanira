@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" href="/logo/logo.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanira: {
+                            green: '#2F7D32',
+                            greenLight: '#E8F5E9',
+                            greenDark: '#1B5E20',
+                            brown: '#6D4C41',
+                            cream: '#F9F7F2',
+                            dark: '#1F2937',
+                            gray: '#6B7280',
+                            accent: '#F59E0B',
+                        }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)', 'card': '0 10px 15px -3px rgba(0, 0, 0, 0.05)' },
+                    animation: { 'bounce-slow': 'bounce 3s infinite' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes scaleIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-scale { animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; }
+        .animate-enter { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+    </style>
+</head>
+<body class="bg-tanira-cream text-tanira-dark font-sans min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+
+    <!-- DECORATION -->
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-tanira-green opacity-5 rounded-full blur-3xl -mr-20 -mt-20"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-tanira-brown opacity-5 rounded-full blur-3xl -ml-20 -mb-20"></div>
+    </div>
+
+    <main class="w-full max-w-lg relative z-10 min-h-[500px] flex flex-col justify-center">
+
+        <% if (plan) { %>
+            <!-- ==================== STATE: SUCCESS ==================== -->
+            <div id="state-success" class="text-center space-y-8 block">
+                
+                <!-- Icon -->
+                <div class="animate-scale flex justify-center">
+                    <div class="relative">
+                        <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center text-tanira-green text-5xl shadow-lg shadow-green-100">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <div class="absolute -top-2 -right-2 text-tanira-accent animate-bounce-slow text-xl">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Heading -->
+                <div class="animate-enter delay-100">
+                    <h1 class="text-2xl md:text-3xl font-bold text-tanira-dark mb-2">Rencana Tanam Tersimpan!</h1>
+                    <p class="text-tanira-gray">Langkah awal yang baik. Berikut ringkasan rencana Anda.</p>
+                </div>
+
+                <!-- Summary Card -->
+                <div class="animate-enter delay-200 bg-white rounded-2xl shadow-card overflow-hidden text-left border-t-4 border-tanira-green relative">
+                    <i class="fa-solid fa-seedling absolute -bottom-4 -right-4 text-9xl text-tanira-green opacity-5"></i>
+                    
+                    <div class="p-6 space-y-4 relative z-10">
+                        <div class="flex justify-between items-start border-b border-gray-100 pb-4">
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Komoditas</p>
+                                <h3 class="text-xl font-bold text-tanira-dark"><%= plan.crop.name %></h3>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Luas Lahan</p>
+                                <h3 class="text-xl font-bold text-tanira-dark"><%= plan.landArea %> Ha</h3>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-y-4 pt-2">
+                            <div>
+                                <p class="text-xs text-gray-400">Estimasi Panen</p>
+                                <!-- Animasi angka dilakukan via EJS render static -->
+                                <p class="font-bold text-tanira-dark text-lg"><%= plan.expectedYield %> Ton</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Risiko</p>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-green-50 text-tanira-green capitalize">
+                                    <i class="fa-solid fa-shield-halved"></i> <%= plan.riskLevel %>
+                                </span>
+                            </div>
+                            <div class="col-span-2">
+                                <p class="text-xs text-gray-400">Potensi Pendapatan</p>
+                                <p class="font-bold text-2xl text-tanira-green"><%= helpers.formatRupiah(plan.expectedProfit) %></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTAs -->
+                <div class="animate-enter delay-300 flex flex-col gap-3">
+                    <a href="/dashboard" class="w-full bg-tanira-green text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-tanira-green/20 hover:bg-tanira-greenDark transition transform hover:-translate-y-0.5 flex items-center justify-center">
+                        Kembali ke Dashboard
+                    </a>
+                </div>
+            </div>
+
+        <% } else { %>
+            
+            <!-- ==================== STATE: EMPTY / ERROR ==================== -->
+            <div id="state-empty" class="text-center space-y-8 block">
+                <div class="animate-scale flex justify-center">
+                    <div class="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 text-6xl mb-4">
+                        <i class="fa-regular fa-clipboard"></i>
+                    </div>
+                </div>
+                <div class="animate-enter delay-100 max-w-sm mx-auto">
+                    <h1 class="text-2xl font-bold text-tanira-dark mb-3">Rencana Tidak Ditemukan</h1>
+                    <p class="text-tanira-gray leading-relaxed">
+                        Sepertinya ID rencana tidak valid atau belum dibuat.
+                    </p>
+                </div>
+                <div class="animate-enter delay-200">
+                    <a href="/smart-planting" class="bg-tanira-green text-white font-bold py-4 px-8 rounded-xl shadow-lg transition flex items-center justify-center gap-2 mx-auto w-fit">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Mulai Smart Planting
+                    </a>
+                </div>
+            </div>
+
+        <% } %>
+
+    </main>
+
+</body>
+</html>
