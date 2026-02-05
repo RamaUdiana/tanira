@@ -7,7 +7,7 @@ const fs = require('fs'); // Import fs module
 // --- KONFIGURASI MULTER (UPLOAD FILE) ---
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadDir = 'public/uploads/harvests';
+        const uploadDir = 'src/public/uploads/harvests';
         // Check if directory exists, if not create it
         if (!fs.existsSync(uploadDir)){
             fs.mkdirSync(uploadDir, { recursive: true });
