@@ -7,7 +7,7 @@ const fs = require('fs');
 // --- MULTER CONFIG (Upload Alat) ---
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const dir = 'public/uploads/tools';
+        const dir = 'src/public/uploads/tools';
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
         }

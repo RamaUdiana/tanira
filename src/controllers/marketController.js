@@ -386,7 +386,7 @@ exports.getToolOrderForm = async (req, res) => {
         }
 
         res.render('market/tools-order', {
-            title: 'Ajukan Sewa Alat',
+            title: 'Ajukan',
             tool,
             helpers: { formatRupiah }
         });

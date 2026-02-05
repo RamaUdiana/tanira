@@ -375,12 +375,12 @@ exports.submitOnboarding = async (req, res) => {
     if (!req.session.userId) return res.status(401).json({ message: 'Unauthorized' });
 
     try {
-        // UPDATE: Menerima 'fullname', 'phone', 'province'
-        // 'location' di form onboarding sebelumnya kita ubah jadi 'province' biar match
         const { role, fullname, phone, province } = req.body; 
 
         // Validasi Role
-        const validRoles = ['petani', 'pembeli', 'penyedia'];
+        // Catatan: Pastikan 'produsen' ada di sini jika Anda mengizinkannya, 
+        // atau gunakan 'penyedia' jika itu istilah di database Anda.
+        const validRoles = ['petani', 'pembeli', 'penyedia', 'produsen']; 
         if (!validRoles.includes(role)) {
             return res.status(400).json({ message: 'Role tidak valid' });
         }
@@ -391,8 +391,8 @@ exports.submitOnboarding = async (req, res) => {
             data: {
                 role: role,
                 name: fullname,
-                phone: phone,       // Simpan Phone
-                province: province  // Simpan Province
+                phone: phone,
+                province: province
             }
         });
 
@@ -402,8 +402,20 @@ exports.submitOnboarding = async (req, res) => {
         req.session.user.name = updatedUser.name;
 
         req.session.save(() => {
-            // UPDATE: Tambahkan query param ?tutorial=true
-            res.json({ success: true, redirectUrl: '/dashboard?tutorial=true' });
+            // LOGIC PENENTUAN ROUTE DAN QUERY PARAMETER
+            let targetUrl = '/dashboard'; // Default URL jika tidak ada kondisi khusus
+
+            if (role === 'petani') {
+                // Khusus Petani: Route dashboard biasa + tutorial aktif
+                targetUrl = '/dashboard?tutorial=true';
+            } else if (role === 'penyedia') {
+                // Khusus Produsen/Penyedia: Route berbeda (tanpa tutorial)
+                // Ganti '/dashboard-produsen' dengan route asli Anda
+                targetUrl = '/producer?tutorial=true'; 
+            } 
+
+            // Kirim URL dinamis tersebut ke frontend
+            res.json({ success: true, redirectUrl: targetUrl });
         });
 
     } catch (error) {

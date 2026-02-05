@@ -124,29 +124,38 @@
 
         <!-- 3. PROGRESS TANAM (DINAMIS) -->
         <section class="animate-enter delay-200 bg-white rounded-2xl p-6 shadow-soft border border-gray-50">
-            <div class="flex items-center gap-2 mb-4">
-                <i class="fa-solid fa-list-check text-tanira-green"></i>
-                <h3 class="font-bold text-tanira-dark text-sm uppercase tracking-wide">Status Tanam Terkini</h3>
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-tanira-green"></i>
+                    <h3 class="font-bold text-tanira-dark text-sm uppercase tracking-wide">Progress Pre-Order</h3>
+                </div>
+                <!-- Menampilkan Status Tanam sebagai Badge -->
+                <span class="text-[10px] bg-green-50 text-tanira-green px-2 py-1 rounded font-bold border border-green-100">
+                    Fase: <%= meta.progressStatus %>
+                </span>
             </div>
 
             <div class="mb-2">
                 <div class="flex justify-between text-xs text-gray-400 mb-2 font-medium">
-                    <span>Tanam</span>
-                    <!-- Status Teks Dinamis -->
-                    <span class="text-tanira-green font-bold"><%= meta.progressStatus %></span>
-                    <span>Panen</span>
+                    <!-- Menggunakan data stats.booked (Terjual) -->
+                    <span>Terkumpul: <strong class="text-tanira-dark"><%= stats.booked %> Kg</strong></span>
+                    <!-- Menggunakan data listing.quantity (Target) -->
+                    <span>Target: <%= listing.quantity %> Kg</span>
                 </div>
                 <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                    <!-- Progress Bar Dinamis -->
+                    <!-- UPDATE: Menggunakan stats.progress (Persentase Penjualan) -->
                     <div id="progress-bar" 
                          class="progress-bar-fill h-full bg-tanira-green rounded-full relative" 
-                         data-width="<%= meta.progressWidth %>%">
+                         data-width="<%= stats.progress %>%">
                         <div class="absolute inset-0 bg-white/20 w-full h-full animate-pulse"></div>
                     </div>
                 </div>
+                <div class="text-right mt-1">
+                    <span class="text-[10px] text-tanira-green font-bold"><%= stats.progress %>% Terpenuhi</span>
+                </div>
             </div>
 
-            <!-- CATATAN PETANI TERBARU (DINAMIS) -->
+            <!-- CATATAN PETANI TERBARU -->
             <% if (listing.lastLogMessage) { %>
                 <div class="flex items-start gap-3 mt-4 bg-tanira-greenLight/50 p-4 rounded-xl border border-tanira-green/10">
                     <div class="w-6 h-6 rounded-full bg-tanira-green text-white flex items-center justify-center shrink-0 mt-0.5 text-xs">
@@ -154,7 +163,7 @@
                     </div>
                     <div>
                         <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">
-                            Update: <%= listing.lastLogDate ? new Date(listing.lastLogDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : 'Baru saja' %>
+                            Update Petani: <%= listing.lastLogDate ? new Date(listing.lastLogDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : 'Baru saja' %>
                         </p>
                         <p class="text-xs text-tanira-dark italic leading-relaxed">
                             "<%= listing.lastLogMessage %>"
@@ -165,7 +174,7 @@
                 <div class="flex items-start gap-2 mt-4 bg-gray-50 p-3 rounded-xl">
                     <i class="fa-solid fa-circle-info text-gray-400 mt-0.5 text-xs"></i>
                     <p class="text-xs text-gray-500 leading-relaxed">
-                        Belum ada catatan pembaruan dari petani. Tanaman sedang dalam proses pertumbuhan normal.
+                        Belum ada catatan pembaruan dari petani.
                     </p>
                 </div>
             <% } %>
